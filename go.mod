@@ -1,4 +1,4 @@
-module github.com/Vyom-Yadav/GitHub-Gist-Clone
+module github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend
 
 go 1.20
 
