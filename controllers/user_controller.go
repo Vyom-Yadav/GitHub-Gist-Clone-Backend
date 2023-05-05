@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/Vyom-Yadav/GitHub-Gist-Clone/models"
+	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

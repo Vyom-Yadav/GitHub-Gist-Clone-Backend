@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"github.com/Vyom-Yadav/GitHub-Gist-Clone/controllers"
-	"github.com/Vyom-Yadav/GitHub-Gist-Clone/middleware"
+	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/controllers"
+	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/middleware"
 	"github.com/gin-gonic/gin"
 )
 

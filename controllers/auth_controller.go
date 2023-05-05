@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Vyom-Yadav/GitHub-Gist-Clone/initializers"
-	"github.com/Vyom-Yadav/GitHub-Gist-Clone/models"
-	"github.com/Vyom-Yadav/GitHub-Gist-Clone/utils"
+	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/initializers"
+	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/models"
+	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/thanhpk/randstr"
 	"gorm.io/gorm"

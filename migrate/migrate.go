@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Vyom-Yadav/GitHub-Gist-Clone/initializers"
-	"github.com/Vyom-Yadav/GitHub-Gist-Clone/models"
+	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/initializers"
+	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/models"
 )
 
 func init() {

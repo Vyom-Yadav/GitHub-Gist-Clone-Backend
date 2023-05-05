@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Vyom-Yadav/GitHub-Gist-Clone/controllers"
-	"github.com/Vyom-Yadav/GitHub-Gist-Clone/initializers"
-	"github.com/Vyom-Yadav/GitHub-Gist-Clone/routes"
+	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/controllers"
+	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/initializers"
+	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/routes"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
