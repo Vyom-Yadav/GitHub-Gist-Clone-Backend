@@ -24,6 +24,16 @@ func NetAuthController(DB *gorm.DB) AuthController {
 	}
 }
 
+//	@Summary	Register a new user
+//	@Tags		Authentication
+//	@Accept		json
+//	@Produce	json
+//	@Param		SignUpInput	body		models.SignUpInput	true	"User object that needs to be added to the system"
+//	@Success	201			{object}	map[string]string
+//	@Failure	400			{object}	map[string]string
+//	@Failure	409			{object}	map[string]string
+//	@Failure	500			{object}	map[string]string
+//	@Router		/auth/register [post]
 func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 	var payload *models.SignUpInput
 
@@ -39,7 +49,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 
 	hashedPassword, err := utils.HashPassword(payload.Password)
 	if err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
 		return
 	}
 
@@ -101,6 +111,14 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": message})
 }
 
+//	@Summary	Verify users email address
+//	@Tags		Authentication
+//	@Produce	json
+//	@Param		verificationCode	path		string	true	"Verify the added user object to the database"
+//	@Success	200					{object}	map[string]string
+//	@Failure	400					{object}	map[string]string
+//	@Failure	409					{object}	map[string]string
+//	@Router		/auth/verifyemail [get]
 func (ac *AuthController) VerifyEmail(ctx *gin.Context) {
 	code := ctx.Params.ByName("verificationCode")
 	verificationCode := utils.Encode(code)
@@ -124,6 +142,16 @@ func (ac *AuthController) VerifyEmail(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Email verified successfully"})
 }
 
+//	@Summary	Sign in a user
+//	@Tags		Authentication
+//	@Accept		json
+//	@Produce	json
+//	@Param		SignInInput	body		models.SignInInput	true	"Sign in a user"
+//	@Success	200			{object}	map[string]string
+//	@Failure	400			{object}	map[string]string
+//	@Failure	409			{object}	map[string]string
+//	@Failure	500			{object}	map[string]string
+//	@Router		/auth/login [post]
 func (ac *AuthController) SignInUser(ctx *gin.Context) {
 	var payload *models.SignInInput
 
@@ -174,6 +202,13 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 
 }
 
+//	@Summary	Sign in a user
+//	@Tags		Authentication
+//	@Produce	json
+//	@Success	200	{object}	map[string]string
+//	@Failure	403	{object}	map[string]string
+//	@Failure	500	{object}	map[string]string
+//	@Router		/auth/refresh [get]
 func (ac *AuthController) RefreshAccessToken(ctx *gin.Context) {
 	message := "could not refresh access token"
 
@@ -215,6 +250,11 @@ func (ac *AuthController) RefreshAccessToken(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
+//	@Summary	Log out a user
+//	@Tags		Authentication
+//	@Produce	json
+//	@Success	200	{object}	map[string]string
+//	@Router		/auth/logout [get]
 func (ac *AuthController) LogoutUser(ctx *gin.Context) {
 	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)
 	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
@@ -223,6 +263,16 @@ func (ac *AuthController) LogoutUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
+//	@Summary	Send reset code for password reset
+//	@Tags		Authentication
+//	@Accept		json
+//	@Produce	json
+//	@Param		ForgotPasswordInput	body		models.ForgotPasswordInput	true	"The Input for sending password reset code"
+//	@Success	200					{object}	map[string]string
+//	@Failure	400					{object}	map[string]string
+//	@Failure	401					{object}	map[string]string
+//	@Failure	500					{object}	map[string]string
+//	@Router		/auth/forgotpassword [post]
 func (ac *AuthController) ForgotPassword(ctx *gin.Context) {
 	var payload *models.ForgotPasswordInput
 
@@ -275,6 +325,15 @@ func (ac *AuthController) ForgotPassword(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 }
 
+//	@Summary	Reset password
+//	@Tags		Authentication
+//	@Accept		json
+//	@Produce	json
+//	@Param		ResetPasswordInput	body		models.ResetPasswordInput	true	"The input required to reset the password"
+//	@Param		resetToken			path		string						true	"The token required to reset the password"
+//	@Success	200					{object}	map[string]string
+//	@Failure	400					{object}	map[string]string
+//	@Router		/auth/resetpassword [patch]
 func (ac *AuthController) ResetPassword(ctx *gin.Context) {
 	var payload *models.ResetPasswordInput
 	resetToken := ctx.Params.ByName("resetToken")

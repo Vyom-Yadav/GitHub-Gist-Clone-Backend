@@ -18,6 +18,11 @@ func NewUserController(DB *gorm.DB) UserController {
 	}
 }
 
+//	@Summary	Get the current logged in user details, panics if not logged in.
+//	@Tags		User Operations
+//	@Produce	json
+//	@Success	200	{object}	map[string]string
+//	@Router		/users/me [get]
 func (uc *UserController) GetMe(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(models.User)
 

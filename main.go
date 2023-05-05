@@ -6,11 +6,14 @@ import (
 	"net/http"
 
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/controllers"
+	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/docs"
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/initializers"
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/models"
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/routes"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var (
@@ -46,6 +49,11 @@ func init() {
 	server = gin.Default()
 }
 
+//	@title			GitHub Gist Backend REST API
+//	@version		1.0-alpha
+//	@description	The REST API for GitHub Gist Backend
+
+//	@BasePath	/api/
 func main() {
 	config, err := initializers.LoadConfig("/app/env")
 	if err != nil {
@@ -59,12 +67,22 @@ func main() {
 	server.Use(cors.New(corsConfig))
 
 	router := server.Group("/api")
-	router.GET("/health", func(ctx *gin.Context) {
-		message := "Fuck Off, I am working!"
-		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
-	})
+	router.GET("/health", healthHandler)
+
+	docs.SwaggerInfo.Host = "localhost:" + config.ServerPort
+	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	AuthRouteController.AuthRoute(router)
 	UserRouteController.UserRoute(router)
 	log.Fatal(server.Run(":" + config.ServerPort))
+}
+
+//	@Summary	Check the basic health of api
+//	@Tags		Health
+//	@Produce	json
+//	@Success	200	{object}	map[string]string
+//	@Router		/health [get]
+func healthHandler(ctx *gin.Context) {
+	message := "Fuck Off, I am working!"
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 }
