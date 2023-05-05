@@ -118,7 +118,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 //	@Success	200					{object}	map[string]string
 //	@Failure	400					{object}	map[string]string
 //	@Failure	409					{object}	map[string]string
-//	@Router		/auth/verifyemail [get]
+//	@Router		/auth/verifyemail/{verificationCode} [get]
 func (ac *AuthController) VerifyEmail(ctx *gin.Context) {
 	code := ctx.Params.ByName("verificationCode")
 	verificationCode := utils.Encode(code)
@@ -333,7 +333,7 @@ func (ac *AuthController) ForgotPassword(ctx *gin.Context) {
 //	@Param		resetToken			path		string						true	"The token required to reset the password"
 //	@Success	200					{object}	map[string]string
 //	@Failure	400					{object}	map[string]string
-//	@Router		/auth/resetpassword [patch]
+//	@Router		/auth/resetpassword/{resetToken} [patch]
 func (ac *AuthController) ResetPassword(ctx *gin.Context) {
 	var payload *models.ResetPasswordInput
 	resetToken := ctx.Params.ByName("resetToken")

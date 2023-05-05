@@ -221,7 +221,7 @@ paths:
       summary: Register a new user
       tags:
       - Authentication
-  /auth/resetpassword:
+  /auth/resetpassword/{resetToken}:
     patch:
       consumes:
       - application/json
@@ -255,7 +255,7 @@ paths:
       summary: Reset password
       tags:
       - Authentication
-  /auth/verifyemail:
+  /auth/verifyemail/{verificationCode}:
     get:
       parameters:
       - description: Verify the added user object to the database

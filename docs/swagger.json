@@ -259,7 +259,7 @@
                 }
             }
         },
-        "/auth/resetpassword": {
+        "/auth/resetpassword/{resetToken}": {
             "patch": {
                 "consumes": [
                     "application/json"
@@ -311,7 +311,7 @@
                 }
             }
         },
-        "/auth/verifyemail": {
+        "/auth/verifyemail/{verificationCode}": {
             "get": {
                 "produces": [
                     "application/json"

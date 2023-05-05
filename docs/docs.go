@@ -267,7 +267,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/resetpassword": {
+        "/auth/resetpassword/{resetToken}": {
             "patch": {
                 "consumes": [
                     "application/json"
@@ -319,7 +319,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/verifyemail": {
+        "/auth/verifyemail/{verificationCode}": {
             "get": {
                 "produces": [
                     "application/json"
