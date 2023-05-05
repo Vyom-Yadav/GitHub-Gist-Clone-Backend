@@ -8,6 +8,7 @@ services:
       - ./app.env
     volumes:
       - postgres:/var/lib/postgresql/data
+      - ./scripts:/docker-entrypoint-initdb.d
   pgadmin:
     depends_on:
       - postgres
@@ -17,5 +18,15 @@ services:
       - 5050:80
     env_file:
       - ./pgadmin.env
+  gist-backend:
+    depends_on:
+      - postgres
+    restart: on-failure
+    image: yvyom/github-gist-backend:v1.0-alpha
+    container_name: gist-backend
+    ports:
+      - 8000:8000
+    volumes:
+      - ./app.env:/app/env/app.env
 volumes:
   postgres:

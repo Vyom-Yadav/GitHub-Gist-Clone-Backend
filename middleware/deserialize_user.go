@@ -30,7 +30,7 @@ func DeserializeUser() gin.HandlerFunc {
 			return
 		}
 
-		config, _ := initializers.LoadConfig(".")
+		config, _ := initializers.LoadConfig("/app/env")
 		sub, err := utils.ValidateToken(accessToken, config.AccessTokenPublicKey)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": err.Error()})

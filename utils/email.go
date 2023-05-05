@@ -40,10 +40,10 @@ func ParseTemplateDir(dir string) (*template.Template, error) {
 }
 
 func SendEmail(user *models.User, data *EmailData, emailTemp string) error {
-	config, err := initializers.LoadConfig(".")
+	config, err := initializers.LoadConfig("/app/env")
 
 	if err != nil {
-		log.Println("could not load config", err)
+		log.Println("could not load config ", err)
 		return err
 	}
 
@@ -57,15 +57,15 @@ func SendEmail(user *models.User, data *EmailData, emailTemp string) error {
 
 	var body bytes.Buffer
 
-	template, err := ParseTemplateDir("templates")
+	template, err := ParseTemplateDir(os.Getenv("GIST_EMAIL_TEMPLATE_DIR"))
 	if err != nil {
-		log.Println("could not parse template directory", err)
+		log.Println("could not parse template directory ", err)
 		return err
 	}
 
 	err = template.ExecuteTemplate(&body, emailTemp, &data)
 	if err != nil {
-		log.Println("Could not execute template", err)
+		log.Println("Could not execute template ", err)
 		return err
 	}
 

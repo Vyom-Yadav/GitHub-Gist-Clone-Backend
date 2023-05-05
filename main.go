@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/controllers"
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/initializers"
+	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/models"
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/routes"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -21,12 +23,19 @@ var (
 )
 
 func init() {
-	config, err := initializers.LoadConfig(".")
+	config, err := initializers.LoadConfig("/app/env")
 	if err != nil {
-		log.Fatal("? Could not load environment variables", err)
+		log.Fatal("Could not load environment variables ", err)
 	}
 
 	initializers.ConnectDB(&config)
+
+	err = initializers.DB.AutoMigrate(&models.User{}, &models.UserMetadata{}, &models.Gist{}, &models.Comment{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("Migration complete")
 
 	AuthController = controllers.NetAuthController(initializers.DB)
 	UserController = controllers.NewUserController(initializers.DB)
@@ -38,9 +47,9 @@ func init() {
 }
 
 func main() {
-	config, err := initializers.LoadConfig(".")
+	config, err := initializers.LoadConfig("/app/env")
 	if err != nil {
-		log.Fatal("? Could not load environment variables", err)
+		log.Fatal("Could not load environment variables ", err)
 	}
 
 	corsConfig := cors.DefaultConfig()

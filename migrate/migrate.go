@@ -9,9 +9,9 @@ import (
 )
 
 func init() {
-	config, err := initializers.LoadConfig(".")
+	config, err := initializers.LoadConfig("/app/env")
 	if err != nil {
-		log.Fatal("? Could not load environment variables", err)
+		log.Fatal("Could not load environment variables ", err)
 	}
 
 	initializers.ConnectDB(&config)
@@ -23,5 +23,5 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("? Migration complete")
+	fmt.Println("Migration complete")
 }

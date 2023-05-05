@@ -70,7 +70,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		return
 	}
 
-	config, err := initializers.LoadConfig(".")
+	config, err := initializers.LoadConfig("/app/env")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Something bad happened"})
 		return
@@ -145,7 +145,7 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 		return
 	}
 
-	config, err := initializers.LoadConfig(".")
+	config, err := initializers.LoadConfig("/app/env")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Something bad happened"})
 		return
@@ -184,7 +184,7 @@ func (ac *AuthController) RefreshAccessToken(ctx *gin.Context) {
 		return
 	}
 
-	config, err := initializers.LoadConfig(".")
+	config, err := initializers.LoadConfig("/app/env")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Something bad happened"})
 		return
@@ -245,7 +245,7 @@ func (ac *AuthController) ForgotPassword(ctx *gin.Context) {
 		return
 	}
 
-	config, err := initializers.LoadConfig(".")
+	config, err := initializers.LoadConfig("/app/env")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Something bad happened"})
 		return
