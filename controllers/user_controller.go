@@ -18,7 +18,7 @@ func NewUserController(DB *gorm.DB) UserController {
 	}
 }
 
-//	@Summary	Get the current logged in user details, panics if not logged in.
+//	@Summary	Get the current logged in user details.
 //	@Tags		User Operations
 //	@Produce	json
 //	@Success	200	{object}	map[string]string

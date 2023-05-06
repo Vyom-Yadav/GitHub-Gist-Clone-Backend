@@ -499,7 +499,7 @@ const docTemplate = `{
                 "tags": [
                     "User Operations"
                 ],
-                "summary": "Get the current logged in user details, panics if not logged in.",
+                "summary": "Get the current logged in user details.",
                 "responses": {
                     "200": {
                         "description": "OK",

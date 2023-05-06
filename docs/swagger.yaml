@@ -378,7 +378,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Get the current logged in user details, panics if not logged in.
+      summary: Get the current logged in user details.
       tags:
       - User Operations
 swagger: "2.0"
