@@ -235,6 +235,11 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 		return
 	}
 
+	if !user.Verified {
+		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "Please verify your email address"})
+		return
+	}
+
 	config, err := initializers.LoadConfig("/app/env")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Something bad happened"})
