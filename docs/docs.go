@@ -267,8 +267,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/resendverificationemail/{email}": {
-            "patch": {
+        "/auth/resendverificationemail": {
+            "post": {
                 "consumes": [
                     "application/json"
                 ],
@@ -281,11 +281,13 @@ const docTemplate = `{
                 "summary": "Resend verification email",
                 "parameters": [
                     {
-                        "type": "string",
                         "description": "Resend verification email to the user with the given email",
-                        "name": "email",
-                        "in": "path",
-                        "required": true
+                        "name": "ResendVerificationEmailInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ResendVerificationEmailInput"
+                        }
                     }
                 ],
                 "responses": {
@@ -516,6 +518,17 @@ const docTemplate = `{
     },
     "definitions": {
         "models.ForgotPasswordInput": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ResendVerificationEmailInput": {
             "type": "object",
             "required": [
                 "email"

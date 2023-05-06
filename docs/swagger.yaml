@@ -7,6 +7,13 @@ definitions:
     required:
     - email
     type: object
+  models.ResendVerificationEmailInput:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
   models.ResetPasswordInput:
     properties:
       password:
@@ -221,16 +228,17 @@ paths:
       summary: Register a new user
       tags:
       - Authentication
-  /auth/resendverificationemail/{email}:
-    patch:
+  /auth/resendverificationemail:
+    post:
       consumes:
       - application/json
       parameters:
       - description: Resend verification email to the user with the given email
-        in: path
-        name: email
+        in: body
+        name: ResendVerificationEmailInput
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/models.ResendVerificationEmailInput'
       produces:
       - application/json
       responses:

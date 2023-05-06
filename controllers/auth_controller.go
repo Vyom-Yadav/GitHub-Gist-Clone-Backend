@@ -147,17 +147,22 @@ func (ac *AuthController) VerifyEmail(ctx *gin.Context) {
 //	@Tags		Authentication
 //	@Accept		json
 //	@Produce	json
-//	@Param		email	path		string	true	"Resend verification email to the user with the given email"
-//	@Success	200		{object}	map[string]string
-//	@Failure	400		{object}	map[string]string
-//	@Failure	409		{object}	map[string]string
-//	@Failure	500		{object}	map[string]string
-//	@Router		/auth/resendverificationemail/{email} [patch]
+//	@Param		ResendVerificationEmailInput	body		models.ResendVerificationEmailInput	true	"Resend verification email to the user with the given email"
+//	@Success	200								{object}	map[string]string
+//	@Failure	400								{object}	map[string]string
+//	@Failure	409								{object}	map[string]string
+//	@Failure	500								{object}	map[string]string
+//	@Router		/auth/resendverificationemail [post]
 func (ac *AuthController) ResendVerificationEmail(ctx *gin.Context) {
-	email := ctx.Params.ByName("email")
+	var payload *models.ResendVerificationEmailInput
+
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
 
 	var user models.User
-	result := ac.DB.First(&user, "email = ?", strings.ToLower(email))
+	result := ac.DB.First(&user, "email = ?", strings.ToLower(payload.Email))
 	if result.Error != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "User with that email doesn't exists"})
 		return
