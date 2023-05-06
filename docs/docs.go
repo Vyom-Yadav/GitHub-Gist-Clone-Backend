@@ -172,7 +172,7 @@ const docTemplate = `{
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Sign in a user",
+                "summary": "Refresh access token with refresh token",
                 "responses": {
                     "200": {
                         "description": "OK",

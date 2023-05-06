@@ -259,7 +259,7 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 
 }
 
-//	@Summary	Sign in a user
+//	@Summary	Refresh access token with refresh token
 //	@Tags		Authentication
 //	@Produce	json
 //	@Success	200	{object}	map[string]string

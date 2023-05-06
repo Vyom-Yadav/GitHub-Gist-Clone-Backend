@@ -177,7 +177,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Sign in a user
+      summary: Refresh access token with refresh token
       tags:
       - Authentication
   /auth/register:
