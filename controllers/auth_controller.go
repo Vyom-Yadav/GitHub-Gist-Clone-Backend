@@ -72,7 +72,6 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 	result := ac.DB.Create(&newUser)
 
 	if result.Error != nil && strings.Contains(result.Error.Error(), "duplicate key value violates unique") {
-		// TODO: Add check for username already taken too
 		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "User with that email already exists"})
 		return
 	} else if result.Error != nil {
@@ -82,6 +81,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 
 	config, err := initializers.LoadConfig("/app/env")
 	if err != nil {
+		ac.DB.Delete(&newUser)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Something bad happened"})
 		return
 	}
@@ -103,6 +103,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 
 	err = utils.SendEmail(&newUser, &emailData, "verificationCode.html")
 	if err != nil {
+		ac.DB.Delete(&newUser)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Something bad happened"})
 		return
 	}
@@ -140,6 +141,62 @@ func (ac *AuthController) VerifyEmail(ctx *gin.Context) {
 	ac.DB.Save(&updatedUser)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Email verified successfully"})
+}
+
+//	@Summary	Resend verification email
+//	@Tags		Authentication
+//	@Accept		json
+//	@Produce	json
+//	@Param		email	path		string	true	"Resend verification email to the user with the given email"
+//	@Success	200		{object}	map[string]string
+//	@Failure	400		{object}	map[string]string
+//	@Failure	409		{object}	map[string]string
+//	@Failure	500		{object}	map[string]string
+//	@Router		/auth/resendverificationemail/{email} [patch]
+func (ac *AuthController) ResendVerificationEmail(ctx *gin.Context) {
+	email := ctx.Params.ByName("email")
+
+	var user models.User
+	result := ac.DB.First(&user, "email = ?", strings.ToLower(email))
+	if result.Error != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "User with that email doesn't exists"})
+		return
+	}
+
+	if user.Verified {
+		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "User already verified"})
+		return
+	}
+
+	config, err := initializers.LoadConfig("/app/env")
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Something bad happened"})
+		return
+	}
+
+	// Generate Verification Code
+	code := randstr.String(20)
+
+	verificationCode := utils.Encode(code)
+
+	// Update User in Database
+	user.VerificationCode = verificationCode
+	ac.DB.Save(user)
+
+	emailData := utils.EmailData{
+		URL:       config.ClientOrigin + "/verifyemail/" + code,
+		FirstName: user.FirstName,
+		Subject:   "Your account verification code",
+	}
+
+	err = utils.SendEmail(&user, &emailData, "verificationCode.html")
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Something bad happened"})
+		return
+	}
+
+	message := "We sent an email with a verification code to " + user.Email
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 }
 
 //	@Summary	Sign in a user
@@ -372,4 +429,24 @@ func (ac *AuthController) ResetPassword(ctx *gin.Context) {
 	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, false)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Password data updated successfully"})
+}
+
+//	@Summary	Check if username is available
+//	@Tags		Authentication
+//	@Produce	json
+//	@Param		username	path		string	true	"The username to check availability"
+//	@Success	200			{object}	map[string]string
+//	@Failure	400			{object}	map[string]string
+//	@Router		/auth/usernameavailable/{username} [get]
+func (ac *AuthController) CheckUsernameAvailability(ctx *gin.Context) {
+	username := ctx.Params.ByName("username")
+
+	var user models.User
+	result := ac.DB.First(&user, "username = ?", username)
+	if result.Error != nil {
+		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Username is available"})
+		return
+	}
+
+	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Username is not available"})
 }

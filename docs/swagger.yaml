@@ -221,6 +221,46 @@ paths:
       summary: Register a new user
       tags:
       - Authentication
+  /auth/resendverificationemail/{email}:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Resend verification email to the user with the given email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Resend verification email
+      tags:
+      - Authentication
   /auth/resetpassword/{resetToken}:
     patch:
       consumes:
@@ -253,6 +293,32 @@ paths:
               type: string
             type: object
       summary: Reset password
+      tags:
+      - Authentication
+  /auth/usernameavailable/{username}:
+    get:
+      parameters:
+      - description: The username to check availability
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Check if username is available
       tags:
       - Authentication
   /auth/verifyemail/{verificationCode}:
