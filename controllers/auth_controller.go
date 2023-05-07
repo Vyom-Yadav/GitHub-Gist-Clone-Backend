@@ -33,6 +33,7 @@ func NetAuthController(DB *gorm.DB) AuthController {
 //	@Failure	400			{object}	map[string]string
 //	@Failure	409			{object}	map[string]string
 //	@Failure	500			{object}	map[string]string
+//	@Failure	502			{object}	map[string]string
 //	@Router		/auth/register [post]
 func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 	var payload *models.SignUpInput
@@ -65,10 +66,12 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		Verified:     false,
 		CreatedAt:    now,
 		UpdatedAt:    now,
-		UserMetadata: models.UserMetadata{},
-		Gists:        nil,
+		UserMetadata: models.UserMetadata{
+			ProfilePicture: "default.png", // TODO: Change this to a default profile picture in some storage
+		},
 	}
 
+	// Only non-zero associations will be upserted
 	result := ac.DB.Create(&newUser)
 
 	if result.Error != nil && strings.Contains(result.Error.Error(), "duplicate key value violates unique") {
@@ -79,9 +82,12 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		return
 	}
 
+	var createdUser models.User
+	ac.DB.First(&createdUser, "username = ?", newUser.Username)
+
 	config, err := initializers.LoadConfig("/app/env")
 	if err != nil {
-		ac.DB.Delete(&newUser)
+		ac.DB.Delete(&createdUser)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Something bad happened"})
 		return
 	}
@@ -92,23 +98,23 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 	verificationCode := utils.Encode(code)
 
 	// Update User in Database
-	newUser.VerificationCode = verificationCode
-	ac.DB.Save(newUser)
+	createdUser.VerificationCode = verificationCode
+	ac.DB.Save(createdUser)
 
 	emailData := utils.EmailData{
 		URL:       config.ClientOrigin + "/verifyemail/" + code,
-		FirstName: newUser.FirstName,
+		FirstName: createdUser.FirstName,
 		Subject:   "Your account verification code",
 	}
 
-	err = utils.SendEmail(&newUser, &emailData, "verificationCode.html")
+	err = utils.SendEmail(&createdUser, &emailData, "verificationCode.html")
 	if err != nil {
-		ac.DB.Delete(&newUser)
+		ac.DB.Delete(&createdUser)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Something bad happened"})
 		return
 	}
 
-	message := "We sent an email with a verification code to " + newUser.Email
+	message := "We sent an email with a verification code to " + createdUser.Email
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": message})
 }
 

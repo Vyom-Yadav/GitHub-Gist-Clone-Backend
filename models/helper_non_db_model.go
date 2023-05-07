@@ -28,6 +28,7 @@ type UserResponse struct {
 	UserMetadata UserMetadata `json:"userMetadata,omitempty"`
 	CreatedAt    time.Time    `json:"created_at"`
 	UpdatedAt    time.Time    `json:"updated_at"`
+	Gists        []Gist       `json:"gists,omitempty"`
 }
 
 type ForgotPasswordInput struct {

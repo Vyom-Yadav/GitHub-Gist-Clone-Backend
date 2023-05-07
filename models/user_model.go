@@ -22,14 +22,14 @@ type User struct {
 	UpdatedAt          time.Time `gorm:"not null"`
 
 	// One-to-One Mapping
-	UserMetadata UserMetadata `gorm:"foreignKey:UserName;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	UserMetadata UserMetadata `gorm:"foreignKey:Username;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 
 	// One-to-Many Mapping
-	Gists []Gist `gorm:"foreignKey:UserName;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
+	Gists []Gist `gorm:"foreignKey:Username;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }
 
 type UserMetadata struct {
-	UserName       string   `gorm:"type:varchar(255)"` // Foreign Key
+	Username       string   `gorm:"type:varchar(255);primary_key"` // Foreign Key
 	StatusIcon     string   `gorm:"type:varchar(255)"`
 	ProfilePicture string   `gorm:"not null"`
 	Location       string   `gorm:"type:varchar(255)"`
@@ -42,7 +42,7 @@ type UserMetadata struct {
 }
 
 type Gist struct {
-	UserName  string    `gorm:"type:varchar(255)"` // Foreign Key
+	Username  string    `gorm:"type:varchar(255)"` // Foreign Key
 	Stars     []string  `gorm:"type:varchar(255)[]"`
 	Forks     []string  `gorm:"type:varchar(255)[]"`
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`

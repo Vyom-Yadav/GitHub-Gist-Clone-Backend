@@ -36,6 +36,7 @@ func (uc *UserController) GetMe(ctx *gin.Context) {
 		UserMetadata: currentUser.UserMetadata,
 		CreatedAt:    currentUser.CreatedAt,
 		UpdatedAt:    currentUser.UpdatedAt,
+		Gists:        currentUser.Gists,
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userResponse}})

@@ -225,6 +225,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "502":
+          description: Bad Gateway
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       summary: Register a new user
       tags:
       - Authentication
