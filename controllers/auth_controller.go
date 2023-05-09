@@ -267,9 +267,7 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 
 	ctx.SetCookie("access_token", accessToken, config.AccessTokenMaxAge*60, "/", "localhost", false, true)
 	ctx.SetCookie("refresh_token", refreshToken, config.RefreshTokenMaxAge*60, "/", "localhost", false, true)
-
-	// TODO: See why this has httpOnly as 'false'
-	ctx.SetCookie("logged_in", "true", config.AccessTokenMaxAge*60, "/", "localhost", false, false)
+	ctx.SetCookie("logged_in", "true", config.AccessTokenMaxAge*60, "/", "localhost", false, true)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 
@@ -318,7 +316,7 @@ func (ac *AuthController) RefreshAccessToken(ctx *gin.Context) {
 	}
 
 	ctx.SetCookie("access_token", accessToken, config.AccessTokenMaxAge*60, "/", "localhost", false, true)
-	ctx.SetCookie("logged_in", "true", config.AccessTokenMaxAge*60, "/", "localhost", false, false)
+	ctx.SetCookie("logged_in", "true", config.AccessTokenMaxAge*60, "/", "localhost", false, true)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
@@ -331,7 +329,7 @@ func (ac *AuthController) RefreshAccessToken(ctx *gin.Context) {
 func (ac *AuthController) LogoutUser(ctx *gin.Context) {
 	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)
 	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
-	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, false)
+	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, true)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }
@@ -442,7 +440,7 @@ func (ac *AuthController) ResetPassword(ctx *gin.Context) {
 	// Invalidate user session
 	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)
 	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
-	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, false)
+	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, true)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Password data updated successfully"})
 }
@@ -452,7 +450,6 @@ func (ac *AuthController) ResetPassword(ctx *gin.Context) {
 //	@Produce	json
 //	@Param		username	path		string	true	"The username to check availability"
 //	@Success	200			{object}	map[string]string
-//	@Failure	400			{object}	map[string]string
 //	@Router		/auth/usernameavailable/{username} [get]
 func (ac *AuthController) CheckUsernameAvailability(ctx *gin.Context) {
 	username := ctx.Params.ByName("username")
@@ -464,5 +461,5 @@ func (ac *AuthController) CheckUsernameAvailability(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Username is not available"})
+	ctx.JSON(http.StatusOK, gin.H{"status": "fail", "message": "Username is not available"})
 }
