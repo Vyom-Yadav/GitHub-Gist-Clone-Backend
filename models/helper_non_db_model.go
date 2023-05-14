@@ -43,3 +43,39 @@ type ResetPasswordInput struct {
 type ResendVerificationEmailInput struct {
 	Email string `json:"email" binding:"required,email"`
 }
+
+type PublicUserProfileResponse struct {
+	Username     string       `json:"username,omitempty"`
+	FirstName    string       `json:"firstName,omitempty"`
+	LastName     string       `json:"lastName,omitempty"`
+	UserMetadata UserMetadata `json:"userMetadata,omitempty"`
+}
+
+type CreateGistRequest struct {
+	Private bool   `json:"private"`
+	Content string `json:"content" binding:"required"`
+	Name    string `json:"name" binding:"required"`
+	Title   string `json:"title" binding:"required"`
+}
+
+type CommentOnGistRequest struct {
+	Content string `json:"content" binding:"required"`
+	GistId  string `json:"gistId" binding:"required"`
+}
+
+type UpdateUserDetailsRequest struct {
+	StatusIcon     string `json:"statusIcon"`
+	ProfilePicture string `json:"profilePicture"`
+	Location       string `json:"location"`
+	Website        string `json:"website"`
+	Twitter        string `json:"twitter"`
+	Tagline        string `json:"tagline"`
+}
+
+type UpdateGistRequest struct {
+	Private bool   `json:"private"`
+	Content string `json:"content"`
+	Name    string `json:"name"`
+	Title   string `json:"title"`
+	GistId  string `json:"gistId" binding:"required"`
+}

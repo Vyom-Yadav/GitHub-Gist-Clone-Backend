@@ -23,6 +23,9 @@ var (
 
 	UserController      controllers.UserController
 	UserRouteController routes.UserRouteController
+
+	GistController      controllers.GistController
+	GistRouteController routes.GistRouteController
 )
 
 func init() {
@@ -33,7 +36,13 @@ func init() {
 
 	initializers.ConnectDB(&config)
 
-	err = initializers.DB.AutoMigrate(&models.User{}, &models.UserMetadata{}, &models.Gist{}, &models.Comment{})
+	err = initializers.DB.AutoMigrate(
+		&models.User{},
+		&models.UserMetadata{},
+		&models.Gist{},
+		&models.Comment{},
+		&models.GistContent{},
+	)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -42,9 +51,11 @@ func init() {
 
 	AuthController = controllers.NetAuthController(initializers.DB)
 	UserController = controllers.NewUserController(initializers.DB)
+	GistController = controllers.NewGistController(initializers.DB)
 
 	AuthRouteController = routes.NewAuthRouteController(AuthController)
 	UserRouteController = routes.NewUserRouteController(UserController)
+	GistRouteController = routes.NewGistRouteController(GistController)
 
 	server = gin.Default()
 }
@@ -74,6 +85,7 @@ func main() {
 
 	AuthRouteController.AuthRoute(router)
 	UserRouteController.UserRoute(router)
+	GistRouteController.GistRoute(router)
 	log.Fatal(server.Run(":" + config.ServerPort))
 }
 

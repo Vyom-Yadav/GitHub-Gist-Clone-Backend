@@ -1,5 +1,30 @@
 basePath: /api/
 definitions:
+  models.CommentOnGistRequest:
+    properties:
+      content:
+        type: string
+      gistId:
+        type: string
+    required:
+    - content
+    - gistId
+    type: object
+  models.CreateGistRequest:
+    properties:
+      content:
+        type: string
+      name:
+        type: string
+      private:
+        type: boolean
+      title:
+        type: string
+    required:
+    - content
+    - name
+    - title
+    type: object
   models.ForgotPasswordInput:
     properties:
       email:
@@ -58,6 +83,36 @@ definitions:
     - password
     - passwordConfirm
     - username
+    type: object
+  models.UpdateGistRequest:
+    properties:
+      content:
+        type: string
+      gistId:
+        type: string
+      name:
+        type: string
+      private:
+        type: boolean
+      title:
+        type: string
+    required:
+    - gistId
+    type: object
+  models.UpdateUserDetailsRequest:
+    properties:
+      location:
+        type: string
+      profilePicture:
+        type: string
+      statusIcon:
+        type: string
+      tagline:
+        type: string
+      twitter:
+        type: string
+      website:
+        type: string
     type: object
 info:
   contact: {}
@@ -326,12 +381,6 @@ paths:
             additionalProperties:
               type: string
             type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
       summary: Check if username is available
       tags:
       - Authentication
@@ -367,6 +416,56 @@ paths:
       summary: Verify users email address
       tags:
       - Authentication
+  /gists/{gistId}:
+    get:
+      parameters:
+      - description: The ID of the gist
+        in: path
+        name: gistId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get the gist by gist id, does not load gist comments
+      tags:
+      - Gist Operations
+  /gists/{gistId}/comments:
+    get:
+      parameters:
+      - description: The ID of the gist
+        in: path
+        name: gistId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get the comments of a gist
+      tags:
+      - Gist Operations
   /health:
     get:
       produces:
@@ -381,6 +480,340 @@ paths:
       summary: Check the basic health of api
       tags:
       - Health
+  /users/{username}:
+    get:
+      parameters:
+      - description: The username to get
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get the publicly visible details of a user, does not load gists
+      tags:
+      - User Operations
+  /users/{username}/gistIds:
+    get:
+      parameters:
+      - description: The username to get gists for
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get the publicly visible gist Ids of a user
+      tags:
+      - User Operations
+  /users/{username}/gists:
+    get:
+      parameters:
+      - description: The username to get gists for
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get the publicly visible gists of a user, does not load the gist comments
+      tags:
+      - User Operations
+  /users/comments:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: The Input for creating comment
+        in: body
+        name: CreateCommentInput
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommentOnGistRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a comment on a gist
+      tags:
+      - User Operations
+  /users/details:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: The Input for updating user metadata
+        in: body
+        name: UpdateUserDetailsInput
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserDetailsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update user metadata
+      tags:
+      - User Operations
+  /users/follow/{userToFollow}:
+    patch:
+      parameters:
+      - description: The ID of the user to follow
+        in: path
+        name: userToFollow
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Follow a user
+      tags:
+      - User Operations
+  /users/follow/{userToUnfollow}:
+    patch:
+      parameters:
+      - description: The ID of the user to unfollow
+        in: path
+        name: userToUnfollow
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Unfollow a user
+      tags:
+      - User Operations
+  /users/gists:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: The Input for updating user gist
+        in: body
+        name: UpdateGistInput
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateGistRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update gist data
+      tags:
+      - User Operations
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: The Input for creating gist
+        in: body
+        name: CreateGistInput
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateGistRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a gist
+      tags:
+      - User Operations
+  /users/gists/{gistId}/star:
+    patch:
+      parameters:
+      - description: The ID of the gist to star
+        in: path
+        name: gistId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Star a gist
+      tags:
+      - User Operations
+  /users/gists/{gistId}/unstar:
+    patch:
+      parameters:
+      - description: The ID of the gist to un-star
+        in: path
+        name: gistId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Un-star a gist
+      tags:
+      - User Operations
   /users/me:
     get:
       produces:
@@ -389,8 +822,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
+            additionalProperties: true
             type: object
       summary: Get the current logged in user details.
       tags:
