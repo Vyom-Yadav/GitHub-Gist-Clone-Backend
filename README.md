@@ -1,6 +1,8 @@
 # Github Gist Clone Backend
 
-Backend REST API for GitHub Gist Clone built using Golang, Gin, GORM, Docker, and PostgreSQL and other awesome Go libraries.
+[![Go Build And Test](https://github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/actions/workflows/go.yml/badge.svg)](https://github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/actions/workflows/go.yml)
+
+Backend REST API for GitHub Gist Clone built using Golang, Gin, GORM, Docker, and PostgreSQL and [other awesome Go libraries](https://github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/blob/master/go.mod).
 
 ## Running
 
@@ -39,14 +41,14 @@ SMTP_PORT=2525
 `ACCESS_TOKEN_MAXAGE` - Time in minutes
 `REFRESH_TOKEN_MAXAGE` - Time in minutes
 
-2. `./pgadmin.env` - PostgreSQL admin credentials
+2. `./pgadmin.env` - PostgreSQL admin credentials (Example)
 
 ```properties
 PGADMIN_DEFAULT_EMAIL=user@domain.com
 PGADMIN_DEFAULT_PASSWORD=SuperSecret
 ```
 
-**Note:** Modifying any of the above files might require you to change port numbers, etc. in the `docker-compose.yml` file.
+**Note:** Modifying any of the above files might require you to change port numbers, etc. in the [`docker-compose.yml`](https://github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/blob/master/docker-compose.yaml) file.
 
 ### Starting the application
 
@@ -72,7 +74,7 @@ After modifying the Go source code, you can rebuild the application using the fo
 $ docker build -t yvyom/github-gist-backend:v1.0-alpha .
 ```
 
-You can either use a different tag or remove the older image and use `pull_policy: if_not_present` in the `docker-compose.yml` file to pull the latest image.
+You can either use a different tag or remove the older image and use `pull_policy: if_not_present` in the [`docker-compose.yml`](https://github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/blob/master/docker-compose.yaml) file to pull the latest image.
 
 ## Directory Structure
 
@@ -96,3 +98,44 @@ You can either use a different tag or remove the older image and use `pull_polic
 ├── templates           # Application templates (for sending emails)
 └── utils               # Application utilities (for sending emails, generating tokens, etc.)
 ```
+
+Following actions are currently implemented:
+
+- Check if username is available
+- Check the basic health of api
+- Create a comment on a gist
+- Create a gist
+- Follow a user
+- Get the comments of a gist
+- Get the current logged in user details.
+- Get the gist by gist id, does not load gist comments
+- Get the publicly visible details of a user, does not load gists
+- Get the publicly visible gist Ids of a user
+- Get the publicly visible gists of a user, does not load the gist comments
+- Log out a user
+- Refresh access token with refresh token
+- Register a new user
+- Resend verification email
+- Reset password
+- Send reset code for password reset
+- Sign in a user
+- Star a gist
+- Unfollow a user
+- Un-star a gist
+- Update gist data
+- Update user metadata
+- Verify users email address
+
+More endpoints would be implemented soon!
+
+## Contributing to this project
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
+
+Be Respectful and Kind to each other. We are all here to learn and grow together.
+
+# Give a ⭐️ if you like this project!
