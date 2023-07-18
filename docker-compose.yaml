@@ -23,6 +23,7 @@ services:
       - postgres
     restart: on-failure
     image: yvyom/github-gist-backend:v1.0-alpha
+    pull_policy: if_not_present
     container_name: gist-backend
     ports:
       - 8000:8000
