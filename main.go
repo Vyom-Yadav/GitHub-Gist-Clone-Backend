@@ -29,6 +29,7 @@ var (
 )
 
 func init() {
+	// Volume mapping in docker container ./app.env:/app/env/app.env
 	config, err := initializers.LoadConfig("/app/env")
 	if err != nil {
 		log.Fatal("Could not load environment variables ", err)
@@ -95,6 +96,6 @@ func main() {
 //	@Success	200	{object}	map[string]string
 //	@Router		/health [get]
 func healthHandler(ctx *gin.Context) {
-	message := "Fuck Off, I am working!"
+	message := "I am working! :)"
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 }
