@@ -48,7 +48,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := utils.HashPassword(payload.Password)
+	hashedPassword, err := utils.HashItem(payload.Password)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
 		return
@@ -95,16 +95,20 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 	// Generate Verification Code
 	code := randstr.String(20)
 
-	verificationCode := utils.Encode(code)
+	hashedVerificationCode, err := utils.HashItem(code)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
+		return
+	}
 
 	// Update User in Database
-	createdUser.VerificationCode = verificationCode
+	createdUser.VerificationCode = hashedVerificationCode
 	ac.DB.Save(createdUser)
 
 	emailData := utils.EmailData{
-		URL:       config.ClientOrigin + "/verifyemail/" + code,
+		URL:       config.ClientOrigin + "/verifyemail?verificationCode=" + code + "&username=" + createdUser.Username,
 		FirstName: createdUser.FirstName,
-		Subject:   "Your account verification code",
+		Subject:   "[GitHub-Gist-Clone] Verify your email address",
 	}
 
 	err = utils.SendEmail(&createdUser, &emailData, "verificationCode.html")
@@ -121,24 +125,39 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 //	@Summary	Verify users email address
 //	@Tags		Authentication
 //	@Produce	json
-//	@Param		verificationCode	path		string	true	"Verify the added user object to the database"
+//	@Param		username			query		string	true	"Username of the user to be verified"
+//	@Param		verificationCode	query		string	true	"Verify the added user object to the database"
 //	@Success	200					{object}	map[string]string
 //	@Failure	400					{object}	map[string]string
 //	@Failure	409					{object}	map[string]string
-//	@Router		/auth/verifyemail/{verificationCode} [get]
+//	@Router		/auth/verifyemail [get]
 func (ac *AuthController) VerifyEmail(ctx *gin.Context) {
-	code := ctx.Params.ByName("verificationCode")
-	verificationCode := utils.Encode(code)
+	code, exists := ctx.GetQuery("verificationCode")
+	if !exists {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Missing verification code"})
+		return
+	}
+	username, exists := ctx.GetQuery("username")
+	if !exists {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Missing username"})
+		return
+	}
 
 	var updatedUser models.User
-	result := ac.DB.First(&updatedUser, "verification_code = ?", verificationCode)
+	result := ac.DB.First(&updatedUser, "username = ?", username)
 	if result.Error != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid verification code or user doesn't exists"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "User doesn't exists"})
 		return
 	}
 
 	if updatedUser.Verified {
 		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "User already verified"})
+		return
+	}
+
+	equalityError := utils.VerifyItem(updatedUser.VerificationCode, code)
+	if equalityError != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid verification code"})
 		return
 	}
 
@@ -188,16 +207,16 @@ func (ac *AuthController) ResendVerificationEmail(ctx *gin.Context) {
 	// Generate Verification Code
 	code := randstr.String(20)
 
-	verificationCode := utils.Encode(code)
+	hashedVerificationCode, err := utils.HashItem(code)
 
 	// Update User in Database
-	user.VerificationCode = verificationCode
+	user.VerificationCode = hashedVerificationCode
 	ac.DB.Save(user)
 
 	emailData := utils.EmailData{
-		URL:       config.ClientOrigin + "/verifyemail/" + code,
+		URL:       config.ClientOrigin + "/verifyemail?verificationCode=" + code + "&username=" + user.Username,
 		FirstName: user.FirstName,
-		Subject:   "Your account verification code",
+		Subject:   "[GitHub-Gist-Clone] Verify your email address",
 	}
 
 	err = utils.SendEmail(&user, &emailData, "verificationCode.html")
@@ -236,7 +255,7 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 		return
 	}
 
-	if err := utils.VerifyPassword(user.Password, payload.Password); err != nil {
+	if err := utils.VerifyItem(user.Password, payload.Password); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email or Password"})
 		return
 	}
@@ -375,14 +394,19 @@ func (ac *AuthController) ForgotPassword(ctx *gin.Context) {
 	// Generate Verification Code
 	resetToken := randstr.String(20)
 
-	passwordResetToken := utils.Encode(resetToken)
+	passwordResetToken, err := utils.HashItem(resetToken)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
 	user.PasswordResetToken = passwordResetToken
 
 	user.PasswordResetAt = time.Now().Add(time.Minute * 15)
 	ac.DB.Save(&user)
 
 	emailData := utils.EmailData{
-		URL:       config.ClientOrigin + "/resetpassword/" + resetToken,
+		URL:       config.ClientOrigin + "/resetpassword?resetToken=" + resetToken + "&username=" + user.Username,
 		FirstName: user.FirstName,
 		Subject:   "Your password reset token (valid for 15 min)",
 	}
@@ -401,13 +425,24 @@ func (ac *AuthController) ForgotPassword(ctx *gin.Context) {
 //	@Accept		json
 //	@Produce	json
 //	@Param		ResetPasswordInput	body		models.ResetPasswordInput	true	"The input required to reset the password"
-//	@Param		resetToken			path		string						true	"The token required to reset the password"
+//	@Param		username			query		string						true	"The username of the user"
+//	@Param		resetToken			query		string						true	"The token required to reset the password"
 //	@Success	200					{object}	map[string]string
 //	@Failure	400					{object}	map[string]string
-//	@Router		/auth/resetpassword/{resetToken} [patch]
+//	@Router		/auth/resetpassword [patch]
 func (ac *AuthController) ResetPassword(ctx *gin.Context) {
 	var payload *models.ResetPasswordInput
-	resetToken := ctx.Params.ByName("resetToken")
+	resetToken, exists := ctx.GetQuery("resetToken")
+	if !exists {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Reset token not provided"})
+		return
+	}
+
+	username, exists := ctx.GetQuery("username")
+	if !exists {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Username not provided"})
+		return
+	}
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -419,17 +454,27 @@ func (ac *AuthController) ResetPassword(ctx *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := utils.HashPassword(payload.Password)
+	hashedPassword, err := utils.HashItem(payload.Password)
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
 		return
 	}
-	passwordResetToken := utils.Encode(resetToken)
 
 	var updatedUser models.User
-	result := ac.DB.First(&updatedUser, "password_reset_token = ? AND password_reset_at > ?", passwordResetToken, time.Now())
+	result := ac.DB.First(&updatedUser, "username = ?", username)
 	if result.Error != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "The reset token is invalid or has expired"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "The user does not exists"})
+		return
+	}
+
+	if !updatedUser.PasswordResetAt.After(time.Now()) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Reset token expired"})
+		return
+	}
+
+	validResetTokenError := utils.VerifyItem(updatedUser.PasswordResetToken, resetToken)
+	if validResetTokenError != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid reset token"})
 		return
 	}
 

@@ -330,7 +330,7 @@ paths:
       summary: Resend verification email
       tags:
       - Authentication
-  /auth/resetpassword/{resetToken}:
+  /auth/resetpassword:
     patch:
       consumes:
       - application/json
@@ -341,8 +341,13 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.ResetPasswordInput'
+      - description: The username of the user
+        in: query
+        name: username
+        required: true
+        type: string
       - description: The token required to reset the password
-        in: path
+        in: query
         name: resetToken
         required: true
         type: string
@@ -384,11 +389,16 @@ paths:
       summary: Check if username is available
       tags:
       - Authentication
-  /auth/verifyemail/{verificationCode}:
+  /auth/verifyemail:
     get:
       parameters:
+      - description: Username of the user to be verified
+        in: query
+        name: username
+        required: true
+        type: string
       - description: Verify the added user object to the database
-        in: path
+        in: query
         name: verificationCode
         required: true
         type: string

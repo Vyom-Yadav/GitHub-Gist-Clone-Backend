@@ -339,7 +339,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/resetpassword/{resetToken}": {
+        "/auth/resetpassword": {
             "patch": {
                 "consumes": [
                     "application/json"
@@ -363,9 +363,16 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "The username of the user",
+                        "name": "username",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "The token required to reset the password",
                         "name": "resetToken",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -422,7 +429,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/verifyemail/{verificationCode}": {
+        "/auth/verifyemail": {
             "get": {
                 "produces": [
                     "application/json"
@@ -434,9 +441,16 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Username of the user to be verified",
+                        "name": "username",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Verify the added user object to the database",
                         "name": "verificationCode",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],

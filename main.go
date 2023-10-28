@@ -67,6 +67,7 @@ func init() {
 
 //	@BasePath	/api/
 func main() {
+	// Volume mapping in docker container ./app.env:/app/env/app.env
 	config, err := initializers.LoadConfig("/app/env")
 	if err != nil {
 		log.Fatal("Could not load environment variables ", err)
