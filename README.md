@@ -1,6 +1,7 @@
 # Github Gist Clone Backend
 
 [![Go Build And Test](https://github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/actions/workflows/go.yml/badge.svg)](https://github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/actions/workflows/go.yml)
+[![Docker Image CI](https://github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/actions/workflows/docker-registry-build-and-push.yaml/badge.svg)](https://github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/actions/workflows/docker-registry-build-and-push.yaml)
 
 Backend REST API for GitHub Gist Clone built using Golang, Gin, GORM, Docker, and PostgreSQL and [other awesome Go libraries](https://github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/blob/master/go.mod).
 
