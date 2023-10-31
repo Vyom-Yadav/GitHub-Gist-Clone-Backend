@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"crypto/tls"
 	"html/template"
-	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/initializers"
-	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/models"
 	"github.com/k3a/html2text"
+	"go.uber.org/zap"
 	"gopkg.in/gomail.v2"
 )
 
@@ -39,11 +38,11 @@ func ParseTemplateDir(dir string) (*template.Template, error) {
 	return template.ParseFiles(paths...)
 }
 
-func SendEmail(user *models.User, data *EmailData, emailTemp string) error {
-	config, err := initializers.LoadConfig("/app/env")
+func SendEmail(userEmail string, data *EmailData, emailTemp string) error {
+	config, err := initializers.LoadConfig(os.Getenv("API_ENV_CONFIG_PATH"))
 
 	if err != nil {
-		log.Println("could not load config ", err)
+		zap.L().Error("could not load config ", zap.Error(err))
 		return err
 	}
 
@@ -51,7 +50,7 @@ func SendEmail(user *models.User, data *EmailData, emailTemp string) error {
 	from := config.EmailFrom
 	smtpPass := config.SMTPPass
 	smtpUser := config.SMTPUser
-	to := user.Email
+	to := userEmail
 	smtpHost := config.SMTPHost
 	smtpPort := config.SMTPPort
 
@@ -59,13 +58,13 @@ func SendEmail(user *models.User, data *EmailData, emailTemp string) error {
 
 	template, err := ParseTemplateDir(os.Getenv("GIST_EMAIL_TEMPLATE_DIR"))
 	if err != nil {
-		log.Println("could not parse template directory ", err)
+		zap.L().Error("could not parse template directory ", zap.Error(err))
 		return err
 	}
 
 	err = template.ExecuteTemplate(&body, emailTemp, &data)
 	if err != nil {
-		log.Println("Could not execute template ", err)
+		zap.L().Error("Could not execute template ", zap.Error(err))
 		return err
 	}
 
@@ -81,7 +80,7 @@ func SendEmail(user *models.User, data *EmailData, emailTemp string) error {
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	if err = d.DialAndSend(m); err != nil {
-		log.Println("Could not send email: ", err)
+		zap.L().Error("Could not send email: ", zap.Error(err))
 		return err
 	}
 

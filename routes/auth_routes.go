@@ -28,4 +28,6 @@ func (rc *AuthRouteController) AuthRoute(rg *gin.RouterGroup) {
 	router.GET("/usernameavailable/:username", rc.authController.CheckUsernameAvailability)
 	router.POST("/forgotpassword", rc.authController.ForgotPassword)
 	router.PATCH("/resetpassword", rc.authController.ResetPassword)
+	router.GET("/github/clientid", rc.authController.GetGitHubClientId)
+	router.GET("/github/callback", rc.authController.GitHubCallback)
 }

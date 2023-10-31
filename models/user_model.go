@@ -7,19 +7,23 @@ import (
 )
 
 type User struct {
-	Username           string `gorm:"type:varchar(255);primary_key"`
-	FirstName          string `gorm:"type:varchar(255);not null"`
-	LastName           string `gorm:"type:varchar(255);not null"`
-	Email              string `gorm:"uniqueIndex;not null"`
-	Password           string `gorm:"not null"`
-	Role               string `gorm:"type:varchar(255);not null"`
-	Provider           string `gorm:"not null"`
-	PasswordResetToken string
-	PasswordResetAt    time.Time
-	VerificationCode   string
-	Verified           bool      `gorm:"not null"`
-	CreatedAt          time.Time `gorm:"not null"`
-	UpdatedAt          time.Time `gorm:"not null"`
+	Username        string `gorm:"type:varchar(255);primary_key"`
+	FirstName       string `gorm:"type:varchar(255);not null"`
+	Email           string `gorm:"uniqueIndex;not null"`
+	Password        string `gorm:"not null"`
+	Role            string `gorm:"type:varchar(255);not null"`
+	Provider        string `gorm:"not null"`
+	PasswordResetAt time.Time
+	Verified        bool      `gorm:"not null"`
+	CreatedAt       time.Time `gorm:"not null"`
+	UpdatedAt       time.Time `gorm:"not null"`
+
+	VerificationCode   *string `gorm:"default:null"`
+	PasswordResetToken *string `gorm:"default:null"`
+	LastName           *string `gorm:"type:varchar(255)"`
+
+	// Required for uniquely identifying users using GitHub OAuth
+	GithubUserId *string `gorm:"type:varchar(255);uniqueIndex;default:null"`
 
 	// One-to-One Mapping
 	UserMetadata UserMetadata `gorm:"foreignKey:Username;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
@@ -32,29 +36,21 @@ type UserMetadata struct {
 	Username       string `gorm:"type:varchar(255);primary_key"` // Foreign Key
 	StatusIcon     string `gorm:"type:varchar(255)"`
 	ProfilePicture string `gorm:"not null"`
-	Location       string `gorm:"type:varchar(255)"`
-	Website        string `gorm:"type:varchar(255)"`
-	Twitter        string `gorm:"type:varchar(255)"`
-	Tagline        string `gorm:"type:varchar(255)"`
 
-	// ID's of the gists user has starred
-	StarredGists []string `gorm:"type:varchar(255)[]"`
+	Location *string `gorm:"type:varchar(255);default:null"`
+	Website  *string `gorm:"type:varchar(255);default:null"`
+	Twitter  *string `gorm:"type:varchar(255);default:null"`
+	Tagline  *string `gorm:"type:varchar(255);default:null"`
 
-	// Username of people who have followed the user
-	Followers []string `gorm:"type:varchar(255)[]"`
-
-	// Username of people who the user has followed
-	Following []string `gorm:"type:varchar(255)[]"`
+	StarredGistsCount int `gorm:"not null"`
+	Followers         int `gorm:"not null"`
+	Following         int `gorm:"not null"`
 }
 
 type Gist struct {
 	Username string `gorm:"type:varchar(255)"` // Foreign Key
 
-	// Username of people who have starred the gist
-	Stars []string `gorm:"type:varchar(255)[]"`
-
-	// Username of people who have forked the gist
-	Forks []string `gorm:"type:varchar(255)[]"`
+	StarCount int `gorm:"not null"`
 
 	ID          uuid.UUID   `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
 	Comments    []Comment   `gorm:"foreignKey:GistID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
@@ -81,4 +77,14 @@ type Comment struct {
 	CommentID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
 	CreatedAt time.Time `gorm:"not null"`
 	UpdatedAt time.Time `gorm:"not null"`
+}
+
+type Follow struct {
+	Username   string `gorm:"type:varchar(255);primary_key"`
+	FollowedBy string `gorm:"type:varchar(255);primary_key"`
+}
+
+type Star struct {
+	Username string    `gorm:"type:varchar(255);primary_key"`
+	GistID   uuid.UUID `gorm:"type:uuid;primary_key"`
 }

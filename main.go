@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/controllers"
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/docs"
@@ -14,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"go.uber.org/zap"
 )
 
 var (
@@ -30,10 +32,19 @@ var (
 
 func init() {
 	// Volume mapping in docker container ./app.env:/app/env/app.env
-	config, err := initializers.LoadConfig("/app/env")
+	config, err := initializers.LoadConfig(os.Getenv("API_ENV_CONFIG_PATH"))
 	if err != nil {
 		log.Fatal("Could not load environment variables ", err)
 	}
+
+	var logger *zap.Logger
+	if config.AppEnv == "production" {
+		logger = zap.Must(zap.NewProduction())
+	} else {
+		logger = zap.Must(zap.NewDevelopment())
+	}
+
+	zap.ReplaceGlobals(logger)
 
 	initializers.ConnectDB(&config)
 
@@ -43,9 +54,11 @@ func init() {
 		&models.Gist{},
 		&models.Comment{},
 		&models.GistContent{},
+		&models.Follow{},
+		&models.Star{},
 	)
 	if err != nil {
-		fmt.Println(err)
+		zap.L().Error(err.Error())
 		return
 	}
 	fmt.Println("Migration complete")
@@ -67,10 +80,11 @@ func init() {
 
 //	@BasePath	/api/
 func main() {
+	// TODO: Add logging to the application
 	// Volume mapping in docker container ./app.env:/app/env/app.env
-	config, err := initializers.LoadConfig("/app/env")
+	config, err := initializers.LoadConfig(os.Getenv("API_ENV_CONFIG_PATH"))
 	if err != nil {
-		log.Fatal("Could not load environment variables ", err)
+		zap.L().Fatal("Could not load environment variables", zap.Error(err))
 	}
 
 	corsConfig := cors.DefaultConfig()
@@ -88,7 +102,8 @@ func main() {
 	AuthRouteController.AuthRoute(router)
 	UserRouteController.UserRoute(router)
 	GistRouteController.GistRoute(router)
-	log.Fatal(server.Run(":" + config.ServerPort))
+	zap.L().Fatal("running server on port: " + config.ServerPort,
+		zap.Error(server.Run(":" + config.ServerPort)))
 }
 
 //	@Summary	Check the basic health of api
