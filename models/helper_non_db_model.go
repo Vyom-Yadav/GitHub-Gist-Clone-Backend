@@ -49,6 +49,7 @@ type PublicUserProfileResponse struct {
 	FirstName    string       `json:"firstName,omitempty"`
 	LastName     string       `json:"lastName,omitempty"`
 	UserMetadata UserMetadata `json:"userMetadata,omitempty"`
+	Verified     bool         `json:"verified"`
 }
 
 type CreateGistRequest struct {

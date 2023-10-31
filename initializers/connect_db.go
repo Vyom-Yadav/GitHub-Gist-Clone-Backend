@@ -3,9 +3,13 @@ package initializers
 import (
 	"fmt"
 	"log"
+	"os"
+	"time"
 
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var DB *gorm.DB
@@ -20,9 +24,24 @@ func ConnectDB(config *Config) {
 		config.DBPort,
 	)
 
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("Failed to connect to the Database")
+	var gormConfig = &gorm.Config{}
+	if config.AppEnv != "production" {
+		newLogger := logger.New(
+			log.New(os.Stdout, "\n", log.LstdFlags), // io writer
+			logger.Config{
+				SlowThreshold:             time.Second, // Slow SQL threshold
+				LogLevel:                  logger.Info, // Log level
+				IgnoreRecordNotFoundError: false,       // Ignore ErrRecordNotFound error for logger
+				ParameterizedQueries:      false,       // Don't include params in the SQL log
+				Colorful:                  true,        // Disable color
+			},
+		)
+		gormConfig.Logger = newLogger
 	}
-	log.Println("Connected Successfully to the Database")
+
+	DB, err = gorm.Open(postgres.Open(dsn), gormConfig)
+	if err != nil {
+		zap.L().Fatal("Failed to connect to the Database", zap.Error(err))
+	}
+	zap.L().Info("Connected Successfully to the Database")
 }

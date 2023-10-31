@@ -30,6 +30,11 @@ type Config struct {
 	SMTPPass  string `mapstructure:"SMTP_PASS"`
 	SMTPPort  int    `mapstructure:"SMTP_PORT"`
 	SMTPUser  string `mapstructure:"SMTP_USER"`
+
+	GitHubClientId     string `mapstructure:"GITHUB_CLIENT_ID"`
+	GitHubClientSecret string `mapstructure:"GITHUB_CLIENT_SECRET"`
+
+	AppEnv string `mapstructure:"APP_ENV"`
 }
 
 func LoadConfig(path string) (Config, error) {

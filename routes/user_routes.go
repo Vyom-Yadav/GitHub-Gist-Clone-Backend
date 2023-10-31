@@ -30,5 +30,11 @@ func (uc *UserRouteController) UserRoute(rg *gin.RouterGroup) {
 	router.PATCH("follow/:userToFollow", middleware.DeserializeUser(), uc.userController.FollowUser)
 	router.PATCH("unfollow/:userToUnfollow", middleware.DeserializeUser(), uc.userController.UnfollowUser)
 	router.PATCH("gists/:gistId/star", middleware.DeserializeUser(), uc.userController.StarGist)
-	router.PATCH("gists/:gistId/unstar", middleware.DeserializeUser(), uc.userController.UnStarGist)
+	router.PATCH("gists/:gistId/unstar", middleware.DeserializeUser(), uc.userController.UnstarGist)
+
+	router.GET("/:username/followers", uc.userController.GetFollowerList)
+	router.GET("/:username/following", uc.userController.GetFollowingList)
+	router.GET("/:username/starredGists", uc.userController.GetStarredGists)
+	router.GET("/:username/follows/:otherUser", uc.userController.CheckIfUserFollows)
+	router.GET("/:username/starredGist/:gistId", uc.userController.CheckIfGistStarred)
 }

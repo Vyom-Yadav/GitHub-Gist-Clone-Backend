@@ -24,6 +24,8 @@ services:
     restart: on-failure
     image: yvyom/github-gist-backend:v1.0-alpha
     pull_policy: if_not_present
+    environment:
+      - API_ENV_CONFIG_PATH=/app/env
     container_name: gist-backend
     ports:
       - 8000:8000

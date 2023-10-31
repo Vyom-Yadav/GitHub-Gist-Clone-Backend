@@ -161,6 +161,74 @@ paths:
       summary: Send reset code for password reset
       tags:
       - Authentication
+  /auth/github/callback:
+    get:
+      parameters:
+      - description: code received from GitHub API after user authorizes application
+        in: query
+        name: code
+        required: true
+        type: string
+      - description: new username to be used for the user
+        in: query
+        name: newUsername
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "502":
+          description: Bad Gateway
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user through GitHub
+      tags:
+      - Authentication
+  /auth/github/clientid:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get GitHub Client ID
+      tags:
+      - Authentication
   /auth/login:
     post:
       consumes:
@@ -476,6 +544,35 @@ paths:
       summary: Get the comments of a gist
       tags:
       - Gist Operations
+  /gists/{gistId}/stargazers:
+    get:
+      parameters:
+      - description: The ID of the gist
+        in: path
+        name: gistId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get the stargazers of a gist
+      tags:
+      - Gist Operations
   /health:
     get:
       produces:
@@ -513,6 +610,97 @@ paths:
               type: string
             type: object
       summary: Get the publicly visible details of a user, does not load gists
+      tags:
+      - User Operations
+  /users/{username}/followers:
+    get:
+      parameters:
+      - description: The username of the user to get the followers of
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get the followers of a user
+      tags:
+      - User Operations
+  /users/{username}/following:
+    get:
+      parameters:
+      - description: The username of the user to get the following of
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get the list of users a user is following
+      tags:
+      - User Operations
+  /users/{username}/follows/{otherUser}:
+    get:
+      parameters:
+      - description: The username of the follower
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: The username of the user being followed
+        in: path
+        name: otherUser
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Whether a username follows another username
       tags:
       - User Operations
   /users/{username}/gistIds:
@@ -563,6 +751,72 @@ paths:
               type: string
             type: object
       summary: Get the publicly visible gists of a user, does not load the gist comments
+      tags:
+      - User Operations
+  /users/{username}/starredGist/{gistId}:
+    get:
+      parameters:
+      - description: The username of the user to check the starred gist of
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: The ID of the gist to check if it is starred
+        in: path
+        name: gistId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Whether a user has starred a gist
+      tags:
+      - User Operations
+  /users/{username}/starredGists:
+    get:
+      parameters:
+      - description: The username of the user to get the starred gists of
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get the list of starred gists of a user
       tags:
       - User Operations
   /users/comments:
@@ -624,7 +878,7 @@ paths:
   /users/follow/{userToFollow}:
     patch:
       parameters:
-      - description: The ID of the user to follow
+      - description: The username of the user to follow
         in: path
         name: userToFollow
         required: true
@@ -656,43 +910,6 @@ paths:
               type: string
             type: object
       summary: Follow a user
-      tags:
-      - User Operations
-  /users/follow/{userToUnfollow}:
-    patch:
-      parameters:
-      - description: The ID of the user to unfollow
-        in: path
-        name: userToUnfollow
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Unfollow a user
       tags:
       - User Operations
   /users/gists:
@@ -835,6 +1052,43 @@ paths:
             additionalProperties: true
             type: object
       summary: Get the current logged in user details.
+      tags:
+      - User Operations
+  /users/unfollow/{userToUnfollow}:
+    patch:
+      parameters:
+      - description: The username of the user to unfollow
+        in: path
+        name: userToUnfollow
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Unfollow a user
       tags:
       - User Operations
 swagger: "2.0"

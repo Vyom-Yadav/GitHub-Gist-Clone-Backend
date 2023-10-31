@@ -3,12 +3,14 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/initializers"
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/models"
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/utils"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func DeserializeUser() gin.HandlerFunc {
@@ -30,7 +32,7 @@ func DeserializeUser() gin.HandlerFunc {
 			return
 		}
 
-		config, _ := initializers.LoadConfig("/app/env")
+		config, _ := initializers.LoadConfig(os.Getenv("API_ENV_CONFIG_PATH"))
 		sub, err := utils.ValidateToken(accessToken, config.AccessTokenPublicKey)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": err.Error()})
@@ -38,9 +40,10 @@ func DeserializeUser() gin.HandlerFunc {
 		}
 
 		var user models.User
-		result := initializers.DB.Preload("UserMetadata").Preload("Gists").First(&user, "username = ?", fmt.Sprint(sub))
+		result := initializers.DB.Preload("UserMetadata").Preload("Gists").Preload("Gists.GistContent").First(&user, "username = ?", fmt.Sprint(sub))
 		if result.Error != nil {
 			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user belonging to this token no logger exists"})
+			zap.L().Error(result.Error.Error())
 			return
 		}
 
