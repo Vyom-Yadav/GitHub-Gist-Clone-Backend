@@ -34,29 +34,29 @@ func NetAuthController(DB *gorm.DB) AuthController {
 //	@Accept		json
 //	@Produce	json
 //	@Param		SignUpInput	body		models.SignUpInput	true	"User object that needs to be added to the system"
-//	@Success	201			{object}	map[string]string
-//	@Failure	400			{object}	map[string]string
-//	@Failure	409			{object}	map[string]string
-//	@Failure	500			{object}	map[string]string
-//	@Failure	502			{object}	map[string]string
+//	@Success	201			{object}	models.SuccessResponseWrapper
+//	@Failure	400			{object}	models.ErrorResponseWrapper
+//	@Failure	409			{object}	models.ErrorResponseWrapper
+//	@Failure	500			{object}	models.ErrorResponseWrapper
+//	@Failure	502			{object}	models.ErrorResponseWrapper
 //	@Router		/auth/register [post]
 func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 	var payload *models.SignUpInput
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 		zap.L().Error(err.Error())
 		return
 	}
 
 	if payload.Password != payload.PasswordConfirm {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Passwords do not match"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "Passwords do not match")
 		return
 	}
 
 	hashedPassword, err := utils.HashItem(payload.Password)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
+		utils.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		zap.L().Error(err.Error())
 		return
 	}
@@ -85,10 +85,10 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 	result := ac.DB.Create(&newUser)
 
 	if result.Error != nil && strings.Contains(result.Error.Error(), "duplicate key value violates unique") {
-		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "User with that email already exists"})
+		utils.NewErrorResponse(ctx, http.StatusConflict, "User with that email already exists")
 		return
 	} else if result.Error != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": "Something bad happened"})
+		utils.NewErrorResponse(ctx, http.StatusBadGateway, "Something bad happened")
 		zap.L().Error(result.Error.Error())
 		return
 	}
@@ -106,7 +106,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 
 	verificationCodeErrorMessage := "error while sending verification code, please resend verification code"
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": verificationCodeErrorMessage})
+		utils.NewErrorResponse(ctx, http.StatusInternalServerError, verificationCodeErrorMessage)
 		zap.L().Error(err.Error())
 		return
 	}
@@ -119,20 +119,20 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 
 	err = utils.SendEmail(newUser.Email, &emailData, "verificationCode.html")
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": verificationCodeErrorMessage})
+		utils.NewErrorResponse(ctx, http.StatusInternalServerError, verificationCodeErrorMessage)
 		zap.L().Error(err.Error())
 		return
 	}
 
 	message := "We sent an email with a verification code to " + newUser.Email
-	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": message})
+	utils.NewSuccessResponse(ctx, http.StatusCreated, message)
 }
 
 //	@Summary	Get GitHub Client ID
 //	@Tags		Authentication
 //	@Produce	json
-//	@Success	200	{object}	map[string]string
-//	@Failure	500	{object}	map[string]string
+//	@Success	200	{object}	models.GitHubClientIdResponseWrapper
+//	@Failure	500	{object}	models.ErrorResponseWrapper
 //	@Router		/auth/github/clientid [get]
 func (ac *AuthController) GetGitHubClientId(ctx *gin.Context) {
 	config, err := initializers.LoadConfig(os.Getenv("API_ENV_CONFIG_PATH"))
@@ -142,7 +142,12 @@ func (ac *AuthController) GetGitHubClientId(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "clientId": config.GitHubClientId})
+	statusCode := http.StatusOK
+	ctx.JSON(statusCode, models.GitHubClientIdResponseWrapper{
+		GitHubClientId: models.GitHubClientIdResponse{
+			ClientId: config.GitHubClientId,
+		},
+	})
 }
 
 //	@Summary	Register a new user through GitHub
@@ -150,11 +155,12 @@ func (ac *AuthController) GetGitHubClientId(ctx *gin.Context) {
 //	@Produce	json
 //	@Param		code		query		string	true	"code received from GitHub API after user authorizes application"
 //	@Param		newUsername	query		string	false	"new username to be used for the user"
-//	@Success	201			{object}	map[string]string
-//	@Failure	400			{object}	map[string]string
-//	@Failure	409			{object}	map[string]string
-//	@Failure	500			{object}	map[string]string
-//	@Failure	502			{object}	map[string]string
+//	@Success	201			{object}	models.AccessCodeResponseWrapper
+//	@Success	200			{object}	models.AccessCodeResponseWrapper
+//	@Failure	400			{object}	models.ErrorResponseWrapper
+//	@Failure	409			{object}	models.ErrorResponseWrapper
+//	@Failure	500			{object}	models.ErrorResponseWrapper
+//	@Failure	502			{object}	models.ErrorResponseWrapper
 //	@Router		/auth/github/callback [get]
 func (ac *AuthController) GitHubCallback(ctx *gin.Context) {
 	// TODO: Make sure frontend sets scope=read:user user:email
@@ -237,7 +243,7 @@ func (ac *AuthController) GitHubCallback(ctx *gin.Context) {
 		// Instead we use github_user_id to uniquely identify a user from GitHub
 		githubGistAccessToken, encounteredError := registerLoginCookies(ctx, user.Username)
 		if !encounteredError {
-			ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": githubGistAccessToken})
+			utils.NewAccessCodeResponse(ctx, http.StatusOK, githubGistAccessToken)
 		}
 	}
 }
@@ -257,7 +263,7 @@ func signUpThroughGitHub(ctx *gin.Context, result map[string]interface{}, access
 	if queryResult.Error == nil && queryResult.RowsAffected == 1 {
 		if newUsername == "" {
 			// User would be redirected to another page to choose a new username, GitHub OAuth is still used
-			ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "User with that username already exists, please choose a new username"})
+			utils.NewErrorResponse(ctx, http.StatusConflict, "User with that username already exists, please choose a new username")
 			zap.L().Warn("User with that username already exists, redirect", zap.String("username", username))
 			return
 		}
@@ -279,17 +285,17 @@ func signUpThroughGitHub(ctx *gin.Context, result map[string]interface{}, access
 			creationResult := ac.DB.Create(&newUser)
 
 			if creationResult.Error != nil && strings.Contains(creationResult.Error.Error(), "duplicate key value violates unique") {
-				ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "User with that email already exists"})
+				utils.NewErrorResponse(ctx, http.StatusConflict, "User with that email already exists")
 				return
 			} else if creationResult.Error != nil {
-				ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": "Something bad happened"})
+				utils.NewErrorResponse(ctx, http.StatusBadGateway, "Something bad happened")
 				zap.L().Error(creationResult.Error.Error())
 				return
 			}
 			zap.L().Info("New user created", zap.String("username", newUser.Username))
 			githubGistAccessToken, encounteredError := registerLoginCookies(ctx, newUser.Username)
 			if !encounteredError {
-				ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": githubGistAccessToken})
+				utils.NewAccessCodeResponse(ctx, http.StatusCreated, githubGistAccessToken)
 			}
 		} else {
 			utils.SomethingBadHappened(ctx)
@@ -461,37 +467,37 @@ func getAccessToken(code string) (string, error) {
 //	@Produce	json
 //	@Param		username			query		string	true	"Username of the user to be verified"
 //	@Param		verificationCode	query		string	true	"Verify the added user object to the database"
-//	@Success	200					{object}	map[string]string
-//	@Failure	400					{object}	map[string]string
-//	@Failure	409					{object}	map[string]string
+//	@Success	200					{object}	models.SuccessResponseWrapper
+//	@Failure	400					{object}	models.ErrorResponseWrapper
+//	@Failure	409					{object}	models.ErrorResponseWrapper
 //	@Router		/auth/verifyemail [get]
 func (ac *AuthController) VerifyEmail(ctx *gin.Context) {
 	code, exists := ctx.GetQuery("verificationCode")
 	if !exists {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Missing verification code"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "Missing verification code")
 		return
 	}
 	username, exists := ctx.GetQuery("username")
 	if !exists {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Missing username"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "Missing username")
 		return
 	}
 
 	var updatedUser models.User
 	result := ac.DB.First(&updatedUser, "username = ?", username)
 	if result.Error != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "User doesn't exists"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "User doesn't exists")
 		return
 	}
 
 	if updatedUser.Verified {
-		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "User already verified"})
+		utils.NewErrorResponse(ctx, http.StatusConflict, "User already verified")
 		return
 	}
 
 	equalityError := utils.VerifyItem(*updatedUser.VerificationCode, code)
 	if equalityError != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid verification code"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "Invalid verification code")
 		return
 	}
 
@@ -499,7 +505,7 @@ func (ac *AuthController) VerifyEmail(ctx *gin.Context) {
 	updatedUser.Verified = true
 	ac.DB.Save(&updatedUser)
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Email verified successfully"})
+	utils.NewSuccessResponse(ctx, http.StatusOK, "Email verified successfully")
 }
 
 //	@Summary	Resend verification email
@@ -507,28 +513,28 @@ func (ac *AuthController) VerifyEmail(ctx *gin.Context) {
 //	@Accept		json
 //	@Produce	json
 //	@Param		ResendVerificationEmailInput	body		models.ResendVerificationEmailInput	true	"Resend verification email to the user with the given email"
-//	@Success	200								{object}	map[string]string
-//	@Failure	400								{object}	map[string]string
-//	@Failure	409								{object}	map[string]string
-//	@Failure	500								{object}	map[string]string
+//	@Success	200								{object}	models.SuccessResponseWrapper
+//	@Failure	400								{object}	models.ErrorResponseWrapper
+//	@Failure	409								{object}	models.ErrorResponseWrapper
+//	@Failure	500								{object}	models.ErrorResponseWrapper
 //	@Router		/auth/resendverificationemail [post]
 func (ac *AuthController) ResendVerificationEmail(ctx *gin.Context) {
 	var payload *models.ResendVerificationEmailInput
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var user models.User
 	result := ac.DB.First(&user, "email = ?", strings.ToLower(payload.Email))
 	if result.Error != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "User with that email doesn't exists"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "User with that email doesn't exists")
 		return
 	}
 
 	if user.Verified {
-		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "User already verified"})
+		utils.NewErrorResponse(ctx, http.StatusConflict, "User already verified")
 		return
 	}
 
@@ -560,7 +566,7 @@ func (ac *AuthController) ResendVerificationEmail(ctx *gin.Context) {
 	}
 
 	message := "We sent an email with a verification code to " + user.Email
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
+	utils.NewSuccessResponse(ctx, http.StatusOK, message)
 }
 
 //	@Summary	Sign in a user
@@ -568,16 +574,16 @@ func (ac *AuthController) ResendVerificationEmail(ctx *gin.Context) {
 //	@Accept		json
 //	@Produce	json
 //	@Param		SignInInput	body		models.SignInInput	true	"Sign in a user"
-//	@Success	200			{object}	map[string]string
-//	@Failure	400			{object}	map[string]string
-//	@Failure	409			{object}	map[string]string
-//	@Failure	500			{object}	map[string]string
+//	@Success	200			{object}	models.AccessCodeResponseWrapper
+//	@Failure	400			{object}	models.ErrorResponseWrapper
+//	@Failure	409			{object}	models.ErrorResponseWrapper
+//	@Failure	500			{object}	models.ErrorResponseWrapper
 //	@Router		/auth/login [post]
 func (ac *AuthController) SignInUser(ctx *gin.Context) {
 	var payload *models.SignInInput
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -585,23 +591,23 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 
 	result := ac.DB.First(&user, "email = ?", strings.ToLower(payload.Email))
 	if result.Error != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email or Password"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "Invalid email or Password")
 		return
 	}
 
 	if err := utils.VerifyItem(user.Password, payload.Password); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email or Password"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "Invalid email or Password")
 		return
 	}
 
 	if !user.Verified {
-		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "Please verify your email address"})
+		utils.NewErrorResponse(ctx, http.StatusConflict, "Please verify your email address")
 		return
 	}
 
 	accessToken, encounteredError := registerLoginCookies(ctx, user.Username)
 	if !encounteredError {
-		ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
+		utils.NewAccessCodeResponse(ctx, http.StatusOK, accessToken)
 	}
 }
 
@@ -616,14 +622,14 @@ func registerLoginCookies(ctx *gin.Context, username string) (string, bool) {
 	// Generate Tokens
 	accessToken, err := utils.CreateToken(config.AccessTokenExpiresIn, username, config.AccessTokenPrivateKey)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 		zap.L().Error("Error creating access token", zap.Error(err))
 		return "", true
 	}
 
 	refreshToken, err := utils.CreateToken(config.RefreshTokenExpiresIn, username, config.RefreshTokenPrivateKey)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 		zap.L().Error("Error creating refresh token", zap.Error(err))
 		return "", true
 	}
@@ -637,9 +643,9 @@ func registerLoginCookies(ctx *gin.Context, username string) (string, bool) {
 //	@Summary	Refresh access token with refresh token
 //	@Tags		Authentication
 //	@Produce	json
-//	@Success	200	{object}	map[string]string
-//	@Failure	403	{object}	map[string]string
-//	@Failure	500	{object}	map[string]string
+//	@Success	200	{object}	models.AccessCodeResponseWrapper
+//	@Failure	403	{object}	models.ErrorResponseWrapper
+//	@Failure	500	{object}	models.ErrorResponseWrapper
 //	@Router		/auth/refresh [get]
 func (ac *AuthController) RefreshAccessToken(ctx *gin.Context) {
 	message := "could not refresh access token"
@@ -647,7 +653,7 @@ func (ac *AuthController) RefreshAccessToken(ctx *gin.Context) {
 	cookie, err := ctx.Cookie("refresh_token")
 
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
+		utils.NewErrorResponse(ctx, http.StatusForbidden, message)
 		return
 	}
 
@@ -659,40 +665,40 @@ func (ac *AuthController) RefreshAccessToken(ctx *gin.Context) {
 
 	sub, err := utils.ValidateToken(cookie, config.RefreshTokenPublicKey)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
+		utils.NewErrorResponse(ctx, http.StatusForbidden, err.Error())
 		return
 	}
 
 	var user models.User
 	result := ac.DB.First(&user, "username = ?", sub.(string))
 	if result.Error != nil {
-		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user belonging to this token no logger exists"})
+		utils.NewErrorResponse(ctx, http.StatusForbidden, "the user belonging to this token no logger exists")
 		return
 	}
 
 	accessToken, err := utils.CreateToken(config.AccessTokenExpiresIn, user.Username, config.AccessTokenPrivateKey)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
+		utils.NewErrorResponse(ctx, http.StatusForbidden, err.Error())
 		return
 	}
 
 	ctx.SetCookie("access_token", accessToken, config.AccessTokenMaxAge*60, "/", "localhost", false, true)
 	ctx.SetCookie("logged_in", "true", config.AccessTokenMaxAge*60, "/", "localhost", false, true)
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
+	utils.NewAccessCodeResponse(ctx, http.StatusOK, accessToken)
 }
 
 //	@Summary	Log out a user
 //	@Tags		Authentication
 //	@Produce	json
-//	@Success	200	{object}	map[string]string
+//	@Success	200	{object}	models.SuccessResponseWrapper
 //	@Router		/auth/logout [get]
 func (ac *AuthController) LogoutUser(ctx *gin.Context) {
 	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)
 	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
 	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, true)
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
+	utils.NewSuccessResponse(ctx, http.StatusOK, "Successfully logged out")
 }
 
 //	@Summary	Send reset code for password reset
@@ -700,30 +706,28 @@ func (ac *AuthController) LogoutUser(ctx *gin.Context) {
 //	@Accept		json
 //	@Produce	json
 //	@Param		ForgotPasswordInput	body		models.ForgotPasswordInput	true	"The Input for sending password reset code"
-//	@Success	200					{object}	map[string]string
-//	@Failure	400					{object}	map[string]string
-//	@Failure	401					{object}	map[string]string
-//	@Failure	500					{object}	map[string]string
+//	@Success	200					{object}	models.SuccessResponseWrapper
+//	@Failure	400					{object}	models.ErrorResponseWrapper
+//	@Failure	401					{object}	models.ErrorResponseWrapper
+//	@Failure	500					{object}	models.ErrorResponseWrapper
 //	@Router		/auth/forgotpassword [post]
 func (ac *AuthController) ForgotPassword(ctx *gin.Context) {
 	var payload *models.ForgotPasswordInput
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	message := "You will receive a reset email if user with that email exists"
 
 	var user models.User
 	result := ac.DB.First(&user, "email = ?", strings.ToLower(payload.Email))
 	if result.Error != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email or Password"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "Invalid email or Password")
 		return
 	}
 
 	if !user.Verified {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "Account not verified"})
+		utils.NewErrorResponse(ctx, http.StatusUnauthorized, "Account not verified")
 		return
 	}
 
@@ -738,7 +742,7 @@ func (ac *AuthController) ForgotPassword(ctx *gin.Context) {
 
 	passwordResetToken, err := utils.HashItem(resetToken)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
+		utils.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -759,7 +763,8 @@ func (ac *AuthController) ForgotPassword(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
+	message := "You will receive a reset email if user with that email exists"
+	utils.NewSuccessResponse(ctx, http.StatusOK, message)
 }
 
 //	@Summary	Reset password
@@ -769,54 +774,55 @@ func (ac *AuthController) ForgotPassword(ctx *gin.Context) {
 //	@Param		ResetPasswordInput	body		models.ResetPasswordInput	true	"The input required to reset the password"
 //	@Param		username			query		string						true	"The username of the user"
 //	@Param		resetToken			query		string						true	"The token required to reset the password"
-//	@Success	200					{object}	map[string]string
-//	@Failure	400					{object}	map[string]string
+//	@Success	200					{object}	models.SuccessResponseWrapper
+//	@Failure	400					{object}	models.ErrorResponseWrapper
+//	@Failure	500					{object}	models.ErrorResponseWrapper
 //	@Router		/auth/resetpassword [patch]
 func (ac *AuthController) ResetPassword(ctx *gin.Context) {
 	var payload *models.ResetPasswordInput
 	resetToken, exists := ctx.GetQuery("resetToken")
 	if !exists {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Reset token not provided"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "Reset token not provided")
 		return
 	}
 
 	username, exists := ctx.GetQuery("username")
 	if !exists {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Username not provided"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "Username not provided")
 		return
 	}
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if payload.Password != payload.PasswordConfirm {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Passwords do not match"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "Passwords do not match")
 		return
 	}
 
 	hashedPassword, err := utils.HashItem(payload.Password)
 	if err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		utils.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	var updatedUser models.User
 	result := ac.DB.First(&updatedUser, "username = ?", username)
 	if result.Error != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "The user does not exists"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "The user does not exists")
 		return
 	}
 
 	if !updatedUser.PasswordResetAt.After(time.Now()) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Reset token expired"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "Reset token expired")
 		return
 	}
 
 	validResetTokenError := utils.VerifyItem(*updatedUser.PasswordResetToken, resetToken)
 	if validResetTokenError != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid reset token"})
+		utils.NewErrorResponse(ctx, http.StatusBadRequest, "Invalid reset token")
 		return
 	}
 
@@ -829,24 +835,24 @@ func (ac *AuthController) ResetPassword(ctx *gin.Context) {
 	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
 	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, true)
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Password data updated successfully"})
+	utils.NewSuccessResponse(ctx, http.StatusOK, "Password reset successfully")
 }
 
 //	@Summary	Check if username is available
 //	@Tags		Authentication
 //	@Produce	json
 //	@Param		username	path		string	true	"The username to check availability"
-//	@Success	200			{object}	map[string]string
+//	@Success	200			{object}	models.SuccessResponseWrapper
 //	@Router		/auth/usernameavailable/{username} [get]
 func (ac *AuthController) CheckUsernameAvailability(ctx *gin.Context) {
 	username := ctx.Params.ByName("username")
 
 	var user models.User
 	result := ac.DB.First(&user, "username = ?", username)
-	if result.Error != nil {
-		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Username is available"})
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		utils.NewSuccessResponse(ctx, http.StatusOK, "Username is available")
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "fail", "message": "Username is not available"})
+	utils.NewSuccessResponse(ctx, http.StatusOK, "Username is not available")
 }

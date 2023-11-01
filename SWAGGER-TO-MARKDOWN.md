@@ -25,12 +25,12 @@ Send reset code for password reset
 
 ##### Responses
 
-| Code | Description           | Schema |
-|------|-----------------------|--------|
-| 200  | OK                    | object |
-| 400  | Bad Request           | object |
-| 401  | Unauthorized          | object |
-| 500  | Internal Server Error | object |
+| Code | Description           | Schema                                                          |
+|------|-----------------------|-----------------------------------------------------------------|
+| 200  | OK                    | [models.SuccessResponseWrapper](#models.SuccessResponseWrapper) |
+| 400  | Bad Request           | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
+| 401  | Unauthorized          | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
+| 500  | Internal Server Error | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
 
 ### /auth/github/callback
 
@@ -49,13 +49,14 @@ Register a new user through GitHub
 
 ##### Responses
 
-| Code | Description           | Schema |
-|------|-----------------------|--------|
-| 201  | Created               | object |
-| 400  | Bad Request           | object |
-| 409  | Conflict              | object |
-| 500  | Internal Server Error | object |
-| 502  | Bad Gateway           | object |
+| Code | Description           | Schema                                                                |
+|------|-----------------------|-----------------------------------------------------------------------|
+| 200  | OK                    | [models.AccessCodeResponseWrapper](#models.AccessCodeResponseWrapper) |
+| 201  | Created               | [models.AccessCodeResponseWrapper](#models.AccessCodeResponseWrapper) |
+| 400  | Bad Request           | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)           |
+| 409  | Conflict              | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)           |
+| 500  | Internal Server Error | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)           |
+| 502  | Bad Gateway           | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)           |
 
 ### /auth/github/clientid
 
@@ -67,10 +68,10 @@ Get GitHub Client ID
 
 ##### Responses
 
-| Code | Description           | Schema |
-|------|-----------------------|--------|
-| 200  | OK                    | object |
-| 500  | Internal Server Error | object |
+| Code | Description           | Schema                                                                        |
+|------|-----------------------|-------------------------------------------------------------------------------|
+| 200  | OK                    | [models.GitHubClientIdResponseWrapper](#models.GitHubClientIdResponseWrapper) |
+| 500  | Internal Server Error | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)                   |
 
 ### /auth/login
 
@@ -88,12 +89,12 @@ Sign in a user
 
 ##### Responses
 
-| Code | Description           | Schema |
-|------|-----------------------|--------|
-| 200  | OK                    | object |
-| 400  | Bad Request           | object |
-| 409  | Conflict              | object |
-| 500  | Internal Server Error | object |
+| Code | Description           | Schema                                                                |
+|------|-----------------------|-----------------------------------------------------------------------|
+| 200  | OK                    | [models.AccessCodeResponseWrapper](#models.AccessCodeResponseWrapper) |
+| 400  | Bad Request           | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)           |
+| 409  | Conflict              | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)           |
+| 500  | Internal Server Error | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)           |
 
 ### /auth/logout
 
@@ -105,9 +106,9 @@ Log out a user
 
 ##### Responses
 
-| Code | Description | Schema |
-|------|-------------|--------|
-| 200  | OK          | object |
+| Code | Description | Schema                                                          |
+|------|-------------|-----------------------------------------------------------------|
+| 200  | OK          | [models.SuccessResponseWrapper](#models.SuccessResponseWrapper) |
 
 ### /auth/refresh
 
@@ -119,11 +120,11 @@ Refresh access token with refresh token
 
 ##### Responses
 
-| Code | Description           | Schema |
-|------|-----------------------|--------|
-| 200  | OK                    | object |
-| 403  | Forbidden             | object |
-| 500  | Internal Server Error | object |
+| Code | Description           | Schema                                                                |
+|------|-----------------------|-----------------------------------------------------------------------|
+| 200  | OK                    | [models.AccessCodeResponseWrapper](#models.AccessCodeResponseWrapper) |
+| 403  | Forbidden             | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)           |
+| 500  | Internal Server Error | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)           |
 
 ### /auth/register
 
@@ -141,13 +142,13 @@ Register a new user
 
 ##### Responses
 
-| Code | Description           | Schema |
-|------|-----------------------|--------|
-| 201  | Created               | object |
-| 400  | Bad Request           | object |
-| 409  | Conflict              | object |
-| 500  | Internal Server Error | object |
-| 502  | Bad Gateway           | object |
+| Code | Description           | Schema                                                          |
+|------|-----------------------|-----------------------------------------------------------------|
+| 201  | Created               | [models.SuccessResponseWrapper](#models.SuccessResponseWrapper) |
+| 400  | Bad Request           | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
+| 409  | Conflict              | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
+| 500  | Internal Server Error | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
+| 502  | Bad Gateway           | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
 
 ### /auth/resendverificationemail
 
@@ -165,12 +166,12 @@ Resend verification email
 
 ##### Responses
 
-| Code | Description           | Schema |
-|------|-----------------------|--------|
-| 200  | OK                    | object |
-| 400  | Bad Request           | object |
-| 409  | Conflict              | object |
-| 500  | Internal Server Error | object |
+| Code | Description           | Schema                                                          |
+|------|-----------------------|-----------------------------------------------------------------|
+| 200  | OK                    | [models.SuccessResponseWrapper](#models.SuccessResponseWrapper) |
+| 400  | Bad Request           | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
+| 409  | Conflict              | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
+| 500  | Internal Server Error | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
 
 ### /auth/resetpassword
 
@@ -190,10 +191,11 @@ Reset password
 
 ##### Responses
 
-| Code | Description | Schema |
-|------|-------------|--------|
-| 200  | OK          | object |
-| 400  | Bad Request | object |
+| Code | Description           | Schema                                                          |
+|------|-----------------------|-----------------------------------------------------------------|
+| 200  | OK                    | [models.SuccessResponseWrapper](#models.SuccessResponseWrapper) |
+| 400  | Bad Request           | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
+| 500  | Internal Server Error | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
 
 ### /auth/usernameavailable/{username}
 
@@ -211,9 +213,9 @@ Check if username is available
 
 ##### Responses
 
-| Code | Description | Schema |
-|------|-------------|--------|
-| 200  | OK          | object |
+| Code | Description | Schema                                                          |
+|------|-------------|-----------------------------------------------------------------|
+| 200  | OK          | [models.SuccessResponseWrapper](#models.SuccessResponseWrapper) |
 
 ### /auth/verifyemail
 
@@ -232,11 +234,11 @@ Verify users email address
 
 ##### Responses
 
-| Code | Description | Schema |
-|------|-------------|--------|
-| 200  | OK          | object |
-| 400  | Bad Request | object |
-| 409  | Conflict    | object |
+| Code | Description | Schema                                                          |
+|------|-------------|-----------------------------------------------------------------|
+| 200  | OK          | [models.SuccessResponseWrapper](#models.SuccessResponseWrapper) |
+| 400  | Bad Request | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
+| 409  | Conflict    | [models.ErrorResponseWrapper](#models.ErrorResponseWrapper)     |
 
 ### /gists/{gistId}
 
@@ -680,6 +682,18 @@ Unfollow a user
 
 ### Models
 
+#### models.AccessCodeResponse
+
+| Name        | Type   | Description | Required |
+|-------------|--------|-------------|----------|
+| access_code | string |             | No       |
+
+#### models.AccessCodeResponseWrapper
+
+| Name        | Type                                                    | Description | Required |
+|-------------|---------------------------------------------------------|-------------|----------|
+| access_code | [models.AccessCodeResponse](#models.AccessCodeResponse) |             | No       |
+
 #### models.CommentOnGistRequest
 
 | Name    | Type   | Description | Required |
@@ -696,11 +710,36 @@ Unfollow a user
 | private | boolean |             | No       |
 | title   | string  |             | Yes      |
 
+#### models.ErrorResponse
+
+| Name        | Type    | Description | Required |
+|-------------|---------|-------------|----------|
+| message     | string  |             | No       |
+| status_code | integer |             | No       |
+
+#### models.ErrorResponseWrapper
+
+| Name  | Type                                          | Description | Required |
+|-------|-----------------------------------------------|-------------|----------|
+| error | [models.ErrorResponse](#models.ErrorResponse) |             | No       |
+
 #### models.ForgotPasswordInput
 
 | Name  | Type   | Description | Required |
 |-------|--------|-------------|----------|
 | email | string |             | Yes      |
+
+#### models.GitHubClientIdResponse
+
+| Name      | Type   | Description | Required |
+|-----------|--------|-------------|----------|
+| client_id | string |             | No       |
+
+#### models.GitHubClientIdResponseWrapper
+
+| Name             | Type                                                            | Description | Required |
+|------------------|-----------------------------------------------------------------|-------------|----------|
+| github_client_id | [models.GitHubClientIdResponse](#models.GitHubClientIdResponse) |             | No       |
 
 #### models.ResendVerificationEmailInput
 
@@ -732,6 +771,19 @@ Unfollow a user
 | password        | string |             | Yes      |
 | passwordConfirm | string |             | Yes      |
 | username        | string |             | Yes      |
+
+#### models.SuccessResponse
+
+| Name        | Type    | Description | Required |
+|-------------|---------|-------------|----------|
+| message     | string  |             | No       |
+| status_code | integer |             | No       |
+
+#### models.SuccessResponseWrapper
+
+| Name    | Type                                              | Description | Required |
+|---------|---------------------------------------------------|-------------|----------|
+| success | [models.SuccessResponse](#models.SuccessResponse) |             | No       |
 
 #### models.UpdateGistRequest
 

@@ -1,5 +1,15 @@
 basePath: /api/
 definitions:
+  models.AccessCodeResponse:
+    properties:
+      access_code:
+        type: string
+    type: object
+  models.AccessCodeResponseWrapper:
+    properties:
+      access_code:
+        $ref: '#/definitions/models.AccessCodeResponse'
+    type: object
   models.CommentOnGistRequest:
     properties:
       content:
@@ -25,12 +35,34 @@ definitions:
     - name
     - title
     type: object
+  models.ErrorResponse:
+    properties:
+      message:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  models.ErrorResponseWrapper:
+    properties:
+      error:
+        $ref: '#/definitions/models.ErrorResponse'
+    type: object
   models.ForgotPasswordInput:
     properties:
       email:
         type: string
     required:
     - email
+    type: object
+  models.GitHubClientIdResponse:
+    properties:
+      client_id:
+        type: string
+    type: object
+  models.GitHubClientIdResponseWrapper:
+    properties:
+      github_client_id:
+        $ref: '#/definitions/models.GitHubClientIdResponse'
     type: object
   models.ResendVerificationEmailInput:
     properties:
@@ -83,6 +115,18 @@ definitions:
     - password
     - passwordConfirm
     - username
+    type: object
+  models.SuccessResponse:
+    properties:
+      message:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  models.SuccessResponseWrapper:
+    properties:
+      success:
+        $ref: '#/definitions/models.SuccessResponse'
     type: object
   models.UpdateGistRequest:
     properties:
@@ -137,27 +181,19 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.SuccessResponseWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Send reset code for password reset
       tags:
       - Authentication
@@ -176,36 +212,30 @@ paths:
       produces:
       - application/json
       responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AccessCodeResponseWrapper'
         "201":
           description: Created
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.AccessCodeResponseWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "409":
           description: Conflict
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "502":
           description: Bad Gateway
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Register a new user through GitHub
       tags:
       - Authentication
@@ -217,15 +247,11 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.GitHubClientIdResponseWrapper'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Get GitHub Client ID
       tags:
       - Authentication
@@ -246,27 +272,19 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.AccessCodeResponseWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "409":
           description: Conflict
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Sign in a user
       tags:
       - Authentication
@@ -278,9 +296,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.SuccessResponseWrapper'
       summary: Log out a user
       tags:
       - Authentication
@@ -292,21 +308,15 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.AccessCodeResponseWrapper'
         "403":
           description: Forbidden
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Refresh access token with refresh token
       tags:
       - Authentication
@@ -327,33 +337,23 @@ paths:
         "201":
           description: Created
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.SuccessResponseWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "409":
           description: Conflict
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "502":
           description: Bad Gateway
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Register a new user
       tags:
       - Authentication
@@ -374,27 +374,19 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.SuccessResponseWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "409":
           description: Conflict
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Resend verification email
       tags:
       - Authentication
@@ -425,15 +417,15 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.SuccessResponseWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Reset password
       tags:
       - Authentication
@@ -451,9 +443,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.SuccessResponseWrapper'
       summary: Check if username is available
       tags:
       - Authentication
@@ -476,21 +466,15 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.SuccessResponseWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "409":
           description: Conflict
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Verify users email address
       tags:
       - Authentication

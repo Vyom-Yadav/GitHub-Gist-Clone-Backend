@@ -80,3 +80,21 @@ type UpdateGistRequest struct {
 	Title   string `json:"title"`
 	GistId  string `json:"gistId" binding:"required"`
 }
+
+type ErrorResponse struct {
+	StatusCode int    `json:"status_code"`
+	Message    string `json:"message"`
+}
+
+type SuccessResponse struct {
+	StatusCode int    `json:"status_code"`
+	Message    string `json:"message"`
+}
+
+type GitHubClientIdResponse struct {
+	ClientId string `json:"client_id"`
+}
+
+type AccessCodeResponse struct {
+	AccessCode string `json:"access_code"`
+}
