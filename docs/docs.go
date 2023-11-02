@@ -521,17 +521,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.GistWithoutCommentsWrapper"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponseWrapper"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.ErrorResponseWrapper"
                         }
                     }
                 }
@@ -559,17 +561,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.CommentArrayWrapper"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponseWrapper"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.ErrorResponseWrapper"
                         }
                     }
                 }
@@ -597,22 +601,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.StringArrayWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.ErrorResponseWrapper"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.ErrorResponseWrapper"
                         }
                     }
                 }
@@ -1417,8 +1418,43 @@ const docTemplate = `{
         "models.AccessCodeResponseWrapper": {
             "type": "object",
             "properties": {
-                "access_code": {
+                "data": {
                     "$ref": "#/definitions/models.AccessCodeResponse"
+                }
+            }
+        },
+        "models.Comment": {
+            "type": "object",
+            "properties": {
+                "commentID": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "gistID": {
+                    "description": "Foreign Key",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CommentArrayWrapper": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Comment"
+                    }
                 }
             }
         },
@@ -1489,6 +1525,59 @@ const docTemplate = `{
                 }
             }
         },
+        "models.GistContent": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Foreign Key",
+                    "type": "string"
+                }
+            }
+        },
+        "models.GistWithoutComments": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "gistContent": {
+                    "$ref": "#/definitions/models.GistContent"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "description": "We are hard-coding in logic to make sure name is unique across all gists of a user",
+                    "type": "string"
+                },
+                "private": {
+                    "type": "boolean"
+                },
+                "starCount": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.GistWithoutCommentsWrapper": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.GistWithoutComments"
+                }
+            }
+        },
         "models.GitHubClientIdResponse": {
             "type": "object",
             "properties": {
@@ -1500,7 +1589,7 @@ const docTemplate = `{
         "models.GitHubClientIdResponseWrapper": {
             "type": "object",
             "properties": {
-                "github_client_id": {
+                "data": {
                     "$ref": "#/definitions/models.GitHubClientIdResponse"
                 }
             }
@@ -1577,6 +1666,17 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "models.StringArrayWrapper": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

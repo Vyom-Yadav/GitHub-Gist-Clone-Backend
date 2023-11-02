@@ -7,8 +7,31 @@ definitions:
     type: object
   models.AccessCodeResponseWrapper:
     properties:
-      access_code:
+      data:
         $ref: '#/definitions/models.AccessCodeResponse'
+    type: object
+  models.Comment:
+    properties:
+      commentID:
+        type: string
+      content:
+        type: string
+      createdAt:
+        type: string
+      gistID:
+        description: Foreign Key
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
+  models.CommentArrayWrapper:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Comment'
+        type: array
     type: object
   models.CommentOnGistRequest:
     properties:
@@ -54,6 +77,42 @@ definitions:
     required:
     - email
     type: object
+  models.GistContent:
+    properties:
+      content:
+        type: string
+      id:
+        description: Foreign Key
+        type: string
+    type: object
+  models.GistWithoutComments:
+    properties:
+      createdAt:
+        type: string
+      gistContent:
+        $ref: '#/definitions/models.GistContent'
+      id:
+        type: string
+      name:
+        description: We are hard-coding in logic to make sure name is unique across
+          all gists of a user
+        type: string
+      private:
+        type: boolean
+      starCount:
+        type: integer
+      title:
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
+  models.GistWithoutCommentsWrapper:
+    properties:
+      data:
+        $ref: '#/definitions/models.GistWithoutComments'
+    type: object
   models.GitHubClientIdResponse:
     properties:
       client_id:
@@ -61,7 +120,7 @@ definitions:
     type: object
   models.GitHubClientIdResponseWrapper:
     properties:
-      github_client_id:
+      data:
         $ref: '#/definitions/models.GitHubClientIdResponse'
     type: object
   models.ResendVerificationEmailInput:
@@ -115,6 +174,13 @@ definitions:
     - password
     - passwordConfirm
     - username
+    type: object
+  models.StringArrayWrapper:
+    properties:
+      data:
+        items:
+          type: string
+        type: array
     type: object
   models.SuccessResponse:
     properties:
@@ -492,14 +558,15 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.GistWithoutCommentsWrapper'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Get the gist by gist id, does not load gist comments
       tags:
       - Gist Operations
@@ -517,14 +584,15 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.CommentArrayWrapper'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Get the comments of a gist
       tags:
       - Gist Operations
@@ -542,18 +610,15 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.StringArrayWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Get the stargazers of a gist
       tags:
       - Gist Operations
