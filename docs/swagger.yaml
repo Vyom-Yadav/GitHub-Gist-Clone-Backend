@@ -363,6 +363,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.SuccessResponseWrapper'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Log out a user
       tags:
       - Authentication
@@ -893,6 +901,14 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Create a comment on a gist
       tags:
       - User Operations
@@ -921,6 +937,14 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Update user metadata
       tags:
       - User Operations
@@ -946,6 +970,14 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "404":
           description: Not Found
           schema:
@@ -989,9 +1021,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "404":
           description: Not Found
           schema:
@@ -1025,6 +1059,14 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Create a gist
       tags:
       - User Operations
@@ -1044,6 +1086,14 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "404":
           description: Not Found
           schema:
@@ -1075,6 +1125,14 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "404":
           description: Not Found
           schema:
@@ -1100,6 +1158,14 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Get the current logged in user details.
       tags:
       - User Operations
@@ -1125,6 +1191,14 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "404":
           description: Not Found
           schema:

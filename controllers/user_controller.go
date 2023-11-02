@@ -29,6 +29,8 @@ func NewUserController(DB *gorm.DB) UserController {
 //	@Tags		User Operations
 //	@Produce	json
 //	@Success	200	{object}	map[string]any
+//	@Failure	401	{object}	models.ErrorResponseWrapper
+//	@Failure	403	{object}	models.ErrorResponseWrapper
 //	@Router		/users/me [get]
 func (uc *UserController) GetMe(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(models.User)
@@ -160,6 +162,8 @@ func (uc *UserController) GetUserGistsIds(ctx *gin.Context) {
 //	@Param		CreateGistInput	body		models.CreateGistRequest	true	"The Input for creating gist"
 //	@Success	201				{object}	map[string]any
 //	@Failure	400				{object}	map[string]string
+//	@Failure	401				{object}	models.ErrorResponseWrapper
+//	@Failure	403				{object}	models.ErrorResponseWrapper
 //	@Router		/users/gists [post]
 func (uc *UserController) CreateGist(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(models.User)
@@ -210,6 +214,8 @@ func (uc *UserController) CreateGist(ctx *gin.Context) {
 //	@Param		CreateCommentInput	body		models.CommentOnGistRequest	true	"The Input for creating comment"
 //	@Success	201					{object}	map[string]any
 //	@Failure	400					{object}	map[string]string
+//	@Failure	401					{object}	models.ErrorResponseWrapper
+//	@Failure	403					{object}	models.ErrorResponseWrapper
 //	@Router		/users/comments [post]
 func (uc *UserController) CreateCommentOnGist(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(models.User)
@@ -256,6 +262,8 @@ func (uc *UserController) CreateCommentOnGist(ctx *gin.Context) {
 //	@Param		UpdateUserDetailsInput	body		models.UpdateUserDetailsRequest	true	"The Input for updating user metadata"
 //	@Success	200						{object}	map[string]any
 //	@Failure	400						{object}	map[string]string
+//	@Failure	401						{object}	models.ErrorResponseWrapper
+//	@Failure	403						{object}	models.ErrorResponseWrapper
 //	@Router		/users/details [patch]
 func (uc *UserController) UpdateUserDetails(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(models.User)
@@ -303,7 +311,8 @@ func (uc *UserController) UpdateUserDetails(ctx *gin.Context) {
 //	@Param		UpdateGistInput	body		models.UpdateGistRequest	true	"The Input for updating user gist"
 //	@Success	200				{object}	map[string]any
 //	@Failure	400				{object}	map[string]string
-//	@Failure	401				{object}	map[string]string
+//	@Failure	401				{object}	models.ErrorResponseWrapper
+//	@Failure	403				{object}	models.ErrorResponseWrapper
 //	@Failure	404				{object}	map[string]string
 //	@Router		/users/gists [patch]
 func (uc *UserController) UpdateGist(ctx *gin.Context) {
@@ -364,6 +373,8 @@ func (uc *UserController) UpdateGist(ctx *gin.Context) {
 //	@Success	200				{object}	map[string]any
 //	@Failure	400				{object}	map[string]string
 //	@Failure	404				{object}	map[string]string
+//	@Failure	401				{object}	models.ErrorResponseWrapper
+//	@Failure	403				{object}	models.ErrorResponseWrapper
 //	@Failure	500				{object}	map[string]string
 //	@Router		/users/follow/{userToFollow} [patch]
 func (uc *UserController) FollowUser(ctx *gin.Context) {
@@ -431,6 +442,8 @@ func (uc *UserController) FollowUser(ctx *gin.Context) {
 //	@Success	200				{object}	map[string]any
 //	@Failure	400				{object}	map[string]string
 //	@Failure	404				{object}	map[string]string
+//	@Failure	401				{object}	models.ErrorResponseWrapper
+//	@Failure	403				{object}	models.ErrorResponseWrapper
 //	@Failure	500				{object}	map[string]string
 //	@Router		/users/unfollow/{userToUnfollow} [patch]
 func (uc *UserController) UnfollowUser(ctx *gin.Context) {
@@ -504,6 +517,8 @@ func (uc *UserController) UnfollowUser(ctx *gin.Context) {
 //	@Success	200		{object}	map[string]any
 //	@Failure	404		{object}	map[string]string
 //	@Failure	500		{object}	map[string]string
+//	@Failure	401		{object}	models.ErrorResponseWrapper
+//	@Failure	403		{object}	models.ErrorResponseWrapper
 //	@Router		/users/gists/{gistId}/star [patch]
 func (uc *UserController) StarGist(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(models.User)
@@ -571,6 +586,8 @@ func (uc *UserController) StarGist(ctx *gin.Context) {
 //	@Success	200		{object}	map[string]any
 //	@Failure	404		{object}	map[string]string
 //	@Failure	500		{object}	map[string]string
+//	@Failure	401		{object}	models.ErrorResponseWrapper
+//	@Failure	403		{object}	models.ErrorResponseWrapper
 //	@Router		/users/gists/{gistId}/unstar [patch]
 func (uc *UserController) UnstarGist(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(models.User)

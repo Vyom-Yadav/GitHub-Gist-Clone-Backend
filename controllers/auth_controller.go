@@ -692,6 +692,8 @@ func (ac *AuthController) RefreshAccessToken(ctx *gin.Context) {
 //	@Tags		Authentication
 //	@Produce	json
 //	@Success	200	{object}	models.SuccessResponseWrapper
+//	@Failure	401	{object}	models.ErrorResponseWrapper
+//	@Failure	403	{object}	models.ErrorResponseWrapper
 //	@Router		/auth/logout [get]
 func (ac *AuthController) LogoutUser(ctx *gin.Context) {
 	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)

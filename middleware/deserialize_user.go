@@ -28,21 +28,39 @@ func DeserializeUser() gin.HandlerFunc {
 		}
 
 		if accessToken == "" {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "You are not logged in"})
+			statusCode := http.StatusUnauthorized
+			ctx.AbortWithStatusJSON(statusCode, models.ErrorResponseWrapper{
+				Error: models.ErrorResponse{
+					StatusCode: statusCode,
+					Message:    "You are not logged in",
+				},
+			})
 			return
 		}
 
 		config, _ := initializers.LoadConfig(os.Getenv("API_ENV_CONFIG_PATH"))
 		sub, err := utils.ValidateToken(accessToken, config.AccessTokenPublicKey)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": err.Error()})
+			statusCode := http.StatusUnauthorized
+			ctx.AbortWithStatusJSON(statusCode, models.ErrorResponseWrapper{
+				Error: models.ErrorResponse{
+					StatusCode: statusCode,
+					Message:    err.Error(),
+				},
+			})
 			return
 		}
 
 		var user models.User
 		result := initializers.DB.Preload("UserMetadata").Preload("Gists").Preload("Gists.GistContent").First(&user, "username = ?", fmt.Sprint(sub))
 		if result.Error != nil {
-			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user belonging to this token no logger exists"})
+			statusCode := http.StatusForbidden
+			ctx.AbortWithStatusJSON(statusCode, models.ErrorResponseWrapper{
+				Error: models.ErrorResponse{
+					StatusCode: statusCode,
+					Message:    "the user belonging to this token no logger exists",
+				},
+			})
 			zap.L().Error(result.Error.Error())
 			return
 		}
