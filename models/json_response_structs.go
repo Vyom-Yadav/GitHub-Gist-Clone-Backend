@@ -9,9 +9,9 @@ type SuccessResponseWrapper struct {
 }
 
 type GitHubClientIdResponseWrapper struct {
-	GitHubClientId GitHubClientIdResponse `json:"github_client_id"`
+	GitHubClientId GitHubClientIdResponse `json:"data"`
 }
 
 type AccessCodeResponseWrapper struct {
-	AccessCode AccessCodeResponse `json:"access_code"`
+	AccessCode AccessCodeResponse `json:"data"`
 }
