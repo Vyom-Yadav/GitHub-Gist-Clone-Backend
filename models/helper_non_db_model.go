@@ -98,3 +98,7 @@ type GitHubClientIdResponse struct {
 type AccessCodeResponse struct {
 	AccessCode string `json:"access_code"`
 }
+
+type BooleanResponse struct {
+	Result bool `json:"result"`
+}

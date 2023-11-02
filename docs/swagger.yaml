@@ -10,6 +10,16 @@ definitions:
       data:
         $ref: '#/definitions/models.AccessCodeResponse'
     type: object
+  models.BooleanResponse:
+    properties:
+      result:
+        type: boolean
+    type: object
+  models.BooleanResponseWrapper:
+    properties:
+      data:
+        $ref: '#/definitions/models.BooleanResponse'
+    type: object
   models.Comment:
     properties:
       commentID:
@@ -42,6 +52,11 @@ definitions:
     required:
     - content
     - gistId
+    type: object
+  models.CommentWrapper:
+    properties:
+      data:
+        $ref: '#/definitions/models.Comment'
     type: object
   models.CreateGistRequest:
     properties:
@@ -77,6 +92,34 @@ definitions:
     required:
     - email
     type: object
+  models.Gist:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/models.Comment'
+        type: array
+      createdAt:
+        type: string
+      gistContent:
+        $ref: '#/definitions/models.GistContent'
+      id:
+        type: string
+      name:
+        description: We are hard-coding in logic to make sure name is unique across
+          all gists of a user
+        type: string
+      private:
+        type: boolean
+      starCount:
+        type: integer
+      title:
+        type: string
+      updatedAt:
+        type: string
+      username:
+        description: Foreign Key
+        type: string
+    type: object
   models.GistContent:
     properties:
       content:
@@ -108,6 +151,13 @@ definitions:
       username:
         type: string
     type: object
+  models.GistWithoutCommentsArrayWrapper:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.GistWithoutComments'
+        type: array
+    type: object
   models.GistWithoutCommentsWrapper:
     properties:
       data:
@@ -122,6 +172,24 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/models.GitHubClientIdResponse'
+    type: object
+  models.PublicUserProfileResponse:
+    properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
+      userMetadata:
+        $ref: '#/definitions/models.UserMetadata'
+      username:
+        type: string
+      verified:
+        type: boolean
+    type: object
+  models.PublicUserProfileResponseWrapper:
+    properties:
+      data:
+        $ref: '#/definitions/models.PublicUserProfileResponse'
     type: object
   models.ResendVerificationEmailInput:
     properties:
@@ -194,6 +262,13 @@ definitions:
       success:
         $ref: '#/definitions/models.SuccessResponse'
     type: object
+  models.UUIDArrayWrapper:
+    properties:
+      data:
+        items:
+          type: string
+        type: array
+    type: object
   models.UpdateGistRequest:
     properties:
       content:
@@ -223,6 +298,65 @@ definitions:
         type: string
       website:
         type: string
+    type: object
+  models.UserMetadata:
+    properties:
+      followers:
+        type: integer
+      following:
+        type: integer
+      location:
+        type: string
+      profilePicture:
+        type: string
+      starredGistsCount:
+        type: integer
+      statusIcon:
+        type: string
+      tagline:
+        type: string
+      twitter:
+        type: string
+      username:
+        description: Foreign Key
+        type: string
+      website:
+        type: string
+    type: object
+  models.UserMetadataWrapper:
+    properties:
+      data:
+        $ref: '#/definitions/models.UserMetadata'
+    type: object
+  models.UserResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      gists:
+        items:
+          $ref: '#/definitions/models.Gist'
+        type: array
+      lastName:
+        type: string
+      provider:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+      userMetadata:
+        $ref: '#/definitions/models.UserMetadata'
+      username:
+        type: string
+    type: object
+  models.UserResponseWrapper:
+    properties:
+      data:
+        $ref: '#/definitions/models.UserResponse'
     type: object
 info:
   contact: {}
@@ -575,7 +709,7 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/models.ErrorResponseWrapper'
-      summary: Get the gist by gist id, does not load gist comments
+      summary: Get the gist by gist id, DOES NOT load gist comments
       tags:
       - Gist Operations
   /gists/{gistId}/comments:
@@ -658,15 +792,12 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.PublicUserProfileResponseWrapper'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get the publicly visible details of a user, does not load gists
+            $ref: '#/definitions/models.ErrorResponseWrapper'
+      summary: Get the publicly visible details of a user, DOES NOT load gists
       tags:
       - User Operations
   /users/{username}/followers:
@@ -683,20 +814,15 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.StringArrayWrapper'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Get the followers of a user
       tags:
       - User Operations
@@ -714,20 +840,15 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.StringArrayWrapper'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Get the list of users a user is following
       tags:
       - User Operations
@@ -750,13 +871,11 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.BooleanResponseWrapper'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Whether a username follows another username
       tags:
       - User Operations
@@ -774,14 +893,11 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.UUIDArrayWrapper'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Get the publicly visible gist Ids of a user
       tags:
       - User Operations
@@ -799,15 +915,12 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.GistWithoutCommentsArrayWrapper'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get the publicly visible gists of a user, does not load the gist comments
+            $ref: '#/definitions/models.ErrorResponseWrapper'
+      summary: Get the publicly visible gists of a user, DOES NOT load the gist comments
       tags:
       - User Operations
   /users/{username}/starredGist/{gistId}:
@@ -829,19 +942,15 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.BooleanResponseWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.BooleanResponseWrapper'
       summary: Whether a user has starred a gist
       tags:
       - User Operations
@@ -859,20 +968,15 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.UUIDArrayWrapper'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Get the list of starred gists of a user
       tags:
       - User Operations
@@ -893,14 +997,11 @@ paths:
         "201":
           description: Created
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.CommentWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "401":
           description: Unauthorized
           schema:
@@ -929,14 +1030,11 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.UserMetadataWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "401":
           description: Unauthorized
           schema:
@@ -962,14 +1060,11 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.SuccessResponseWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "401":
           description: Unauthorized
           schema:
@@ -981,15 +1076,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Follow a user
       tags:
       - User Operations
@@ -1010,14 +1097,11 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.GistWithoutCommentsWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "401":
           description: Unauthorized
           schema:
@@ -1029,9 +1113,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Update gist data
       tags:
       - User Operations
@@ -1051,14 +1133,11 @@ paths:
         "201":
           description: Created
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.GistWithoutCommentsWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "401":
           description: Unauthorized
           schema:
@@ -1084,8 +1163,11 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.SuccessResponseWrapper'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "401":
           description: Unauthorized
           schema:
@@ -1097,15 +1179,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Star a gist
       tags:
       - User Operations
@@ -1123,8 +1197,11 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.SuccessResponseWrapper'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "401":
           description: Unauthorized
           schema:
@@ -1136,15 +1213,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Un-star a gist
       tags:
       - User Operations
@@ -1156,8 +1225,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.UserResponseWrapper'
         "401":
           description: Unauthorized
           schema:
@@ -1183,14 +1251,11 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/models.SuccessResponseWrapper'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
         "401":
           description: Unauthorized
           schema:
@@ -1202,15 +1267,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponseWrapper'
       summary: Unfollow a user
       tags:
       - User Operations

@@ -21,7 +21,7 @@ func NewGistController(DB *gorm.DB) GistController {
 	}
 }
 
-//	@Summary	Get the gist by gist id, does not load gist comments
+//	@Summary	Get the gist by gist id, DOES NOT load gist comments
 //	@Tags		Gist Operations
 //	@Produce	json
 //	@Param		gistId	path		string	true	"The ID of the gist"

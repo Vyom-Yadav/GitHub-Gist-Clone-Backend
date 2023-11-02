@@ -51,3 +51,31 @@ type StringArrayWrapper struct {
 type CommentArrayWrapper struct {
 	Comments []Comment `json:"data"`
 }
+
+type UserResponseWrapper struct {
+	UserResponse UserResponse `json:"data"`
+}
+
+type PublicUserProfileResponseWrapper struct {
+	PublicUserProfileResponse PublicUserProfileResponse `json:"data"`
+}
+
+type GistWithoutCommentsArrayWrapper struct {
+	Gists []GistWithoutComments `json:"data"`
+}
+
+type UUIDArrayWrapper struct {
+	UUIDArray []uuid.UUID `json:"data"`
+}
+
+type CommentWrapper struct {
+	Comment Comment `json:"data"`
+}
+
+type UserMetadataWrapper struct {
+	UserMetadata UserMetadata `json:"data"`
+}
+
+type BooleanResponseWrapper struct {
+	BooleanResponse BooleanResponse `json:"data"`
+}

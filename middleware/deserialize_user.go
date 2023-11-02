@@ -11,6 +11,7 @@ import (
 	"github.com/Vyom-Yadav/GitHub-Gist-Clone-Backend/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm/clause"
 )
 
 func DeserializeUser() gin.HandlerFunc {
@@ -52,7 +53,7 @@ func DeserializeUser() gin.HandlerFunc {
 		}
 
 		var user models.User
-		result := initializers.DB.Preload("UserMetadata").Preload("Gists").Preload("Gists.GistContent").First(&user, "username = ?", fmt.Sprint(sub))
+		result := initializers.DB.Preload(clause.Associations).First(&user, "username = ?", fmt.Sprint(sub))
 		if result.Error != nil {
 			statusCode := http.StatusForbidden
 			ctx.AbortWithStatusJSON(statusCode, models.ErrorResponseWrapper{
